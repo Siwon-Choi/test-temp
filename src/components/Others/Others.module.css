@@ -1,0 +1,39 @@
+.others {
+    background-color: #fff;
+    padding: 40px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #333;
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.role {
+    font-size: 16px;
+    color: #4a90d9;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.description {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.8;
+}

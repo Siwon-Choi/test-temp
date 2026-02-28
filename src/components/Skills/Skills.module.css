@@ -1,0 +1,87 @@
+.section {
+  width: 100%;
+  background: #4f97d6;
+  padding: 64px 24px 88px;
+}
+
+.inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0 0 28px;
+  text-align: center;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+/* 카드 1개 */
+.card {
+  width: 100%;
+  background: #eaf6ff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 56px 120px 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 10px;
+}
+
+.row + .row {
+  margin-top: 6px;
+}
+
+/* 아이콘 */
+.iconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+    /* 안에 있는 iconImg 중앙 정렬 */
+  display: grid;
+  place-items: center;
+}
+
+.category {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1c2c3a;
+}
+
+/* 칩들 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+  background: #2f6df6; 
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+
+.iconImg {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}

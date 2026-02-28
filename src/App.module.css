@@ -1,0 +1,13 @@
+.app {
+  margin: 0 auto;
+}
+
+/* header 높이를 고려한 스크롤 마진 설정 */
+section {
+  scroll-margin-top: 72px;
+}
+
+
+.homeSection{
+  height: calc(100vh - 72px); 
+}
