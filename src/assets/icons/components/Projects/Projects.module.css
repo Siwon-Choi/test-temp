@@ -39,46 +39,16 @@
     color: #1a2334;
 }
 
-/* prev/next + (viewport) */
-.carousel {
+.cards {
     margin-top: 28px;
     display: grid;
-    grid-template-columns: 48px 1fr 48px;
-    align-items: center;
-    gap: 18px; /* 화살표와 카드 사이 간격 */
 }
 
-/* 슬라이드 보이는 창 */
-.viewport {
-    overflow: hidden;
-}
-
-/* 실제로 움직이는 트랙 */
-.track {
-    display: flex;
-    width: 100%;
-    transition: transform 0.38s ease; /* “밀리며 이어지는” 느낌 */
-    will-change: transform;
-}
-
-/* 순간이동할 때 트랜지션 끄기 */
-.noTransition {
-    transition: none;
-}
-
-/* 슬라이드 1장(= 카드 4개 페이지) */
-.slide {
-    flex: 0 0 100%;
-}
-
-/* 카드 그리드 */
 .cards {
     margin-top: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
-
-    padding: 0 18px; /* 화살표와 카드 사이 추가 여백 */
 }
 
 .card {
@@ -110,6 +80,7 @@
     font-weight: 800;
     color: #ffffff;
 }
+
 
 .projectDescription {
     margin-top: 8px;
@@ -153,88 +124,93 @@
     text-decoration: none;
     color: #ffffff;
     background: #ec8f6f;
-    border: 1px solid rgba(255,255,255,0.10);
+    border: 1px solid rgba(255, 255, 255, 0.10);
 }
 
 .buttons .button:last-child {
-  background: #ffffff;
-  color: #1a2334;
-  border: 1px solid rgba(255,255,255,0.35);
+    background: #ffffff;
+    color: #1a2334;
+    border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
 .button:hover {
-  filter: brightness(1.04);
-  transform: translateY(-1px);
-  transition: 0.15s ease;
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+    transition: 0.15s ease;
 }
 
 .button img {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-  display: block;
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    display: block;
 }
 
-/* dots는 최하단 유지 */
 .paging {
-  margin-top: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 
-/* prev/next 버튼 (크게) */
+
 .arrow {
-  width: 48px;
-  height: 48px;
-  border-radius: 999px;
-  border: 2px solid rgba(255,255,255,0.7);
-  background: transparent;
-  cursor: pointer;
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    background: transparent;
+    cursor: pointer;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  padding: 0;
+    padding: 0;
 }
 
 .arrow img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  pointer-events: none;
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    pointer-events: none;
 }
 
 .arrow:hover {
-  background: rgba(255,255,255,0.14);
-  border-color: #f0916b;
-  transform: scale(1.05);
-  transition: all 0.15s ease;
+    background: rgba(255, 255, 255, 0.14);
+    border-color: #f0916b;
 }
 
 .dots {
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 }
 
 .dot {
-  width: 12px;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
+    width: 12px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
 
-  padding: 0;
-  box-sizing: border-box;
+    padding: 0;
+    box-sizing: border-box;
 
-  border: 2px solid rgba(255,255,255,0.7);
-  background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    background: transparent;
 
-  cursor: pointer;
-  display: block;
+    cursor: pointer;
+    display: block;
 }
 
 .dotActive {
-  background: #f0916b;
-  border-color: #f0916b;
+    background: #f0916b;
+    border-color: #f0916b;
+}
+
+.carousel {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  gap: 32px; /* 기존 12 → 20 */
 }
