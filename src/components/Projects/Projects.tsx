@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import styles from './Projects.module.css'
 import monitorIcon from '../../assets/icons/monitor.svg'
 import githubIcon from '../../assets/icons/github.png'
 import prevIcon from '../../assets/icons/prev.svg'
 import nextIcon from '../../assets/icons/next.svg'
-
-import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../api/supabase'
 
 type SkillRow = {
@@ -32,7 +31,6 @@ type ProjectRow = {
   projectskill: ProjectSkillRow[] | null
 }
 
-// UI에서 쓰기 편한 형태
 type ProjectUI = {
   project_id: number
   slug: string
@@ -45,299 +43,257 @@ type ProjectUI = {
   githubUrl: string
 }
 
+const PAGE_SIZE = 4
+
 const Projects = () => {
+  const { data: projects = [], isLoading, error } = useQuery<ProjectUI[]>({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('project')
+        .select(`
+          project_id,
+          slug,
+          title,
+          overview,
+          img_url,
+          category,
+          projectskill (
+            id,
+            project_id,
+            skill_id,
+            skill_reason,
+            skill:skill_id (
+              skill_id,
+              name,
+              category
+            )
+          )
+        `)
+        .order('project_id', { ascending: true })
 
-    // 프로젝트 15개
-    const { data: projects = [], isLoading, error } = useQuery<ProjectUI[]>({
-        queryKey: ['projects'],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from('project')
-                .select(`
-                    project_id,
-                    slug,
-                    title,
-                    overview,
-                    img_url,
-                    category,
-                    projectskill (
-                        id,
-                        project_id,
-                        skill_id,
-                        skill_reason,
-                        skill:skill_id (
-                            skill_id,
-                            name,
-                            category
-                        )
-                    )
-                `)
-                .order('project_id', { ascending: true })
+      if (error) throw error
 
-            if (error) throw error
+      const rows = (data ?? []) as unknown as ProjectRow[]
 
-            const rows = (data ?? []) as unknown as ProjectRow[]
+      return rows.map((p) => ({
+        project_id: p.project_id,
+        slug: p.slug,
+        title: p.title,
+        description: p.overview ?? '',
+        skills: (p.projectskill ?? [])
+          .map((ps) => ps.skill?.name)
+          .filter((v): v is string => Boolean(v)),
+        img_url: p.img_url ?? null,
+        category: p.category ?? null,
+        demoUrl: '#',
+        githubUrl: '#',
+      }))
+    },
+  })
 
-            // DB rows -> UI rows
-            return rows.map((p) => {
-                const skills =
-                    (p.projectskill ?? [])
-                        .map((ps) => ps.skill?.name)
-                        .filter((v): v is string => Boolean(v))
+  const pages = useMemo(() => {
+    const out: ProjectUI[][] = []
+    for (let i = 0; i < projects.length; i += PAGE_SIZE) {
+      out.push(projects.slice(i, i + PAGE_SIZE))
+    }
+    return out
+  }, [projects])
 
-                return {
-                    project_id: p.project_id,
-                    slug: p.slug,
-                    title: p.title,
-                    description: p.overview ?? '',
-                    skills,
-                    img_url: p.img_url ?? null,
-                    category: p.category ?? null,
+  const totalPages = pages.length
 
-                    // 필요하면 slug로 라우팅 연결해도 됨
-                    demoUrl: '#',
-                    githubUrl: '#',
-                }
-            })
-        },
+  const loopPages = useMemo(() => {
+    if (totalPages <= 1) return pages
+    const first = pages[0]
+    const last = pages[totalPages - 1]
+    return [last, ...pages, first]
+  }, [pages, totalPages])
+
+  const [index, setIndex] = useState(1)
+  const [animating, setAnimating] = useState(false)
+  const [noTransition, setNoTransition] = useState(false)
+  const pendingJumpRef = useRef(false)
+
+  useEffect(() => {
+    const targetIndex = totalPages <= 1 ? 0 : 1
+
+    // 첫 로딩(비동기 데이터 유입) 시 clone(last) -> first로 애니메이션이 보이지 않게,
+    // transition을 잠깐 끄고 시작 인덱스를 맞춘다.
+    setNoTransition(true)
+    setIndex(targetIndex)
+    setAnimating(false)
+    pendingJumpRef.current = false
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setNoTransition(false)
+      })
     })
+  }, [totalPages])
 
-    // 페이징
-    const PAGE_SIZE = 4
+  const page = totalPages <= 1 ? 0 : (index - 1 + totalPages) % totalPages
 
-    const pages = useMemo(() => {
-        const out: typeof projects[] = []
-        for (let i = 0; i < projects.length; i += PAGE_SIZE) {
-            out.push(projects.slice(i, i + PAGE_SIZE))
-        }
-        return out
-    }, [projects])
+  const goPrev = () => {
+    if (animating || totalPages <= 1) return
+    setAnimating(true)
+    setIndex((prev) => prev - 1)
+  }
 
-    const totalPages = pages.length
+  const goNext = () => {
+    if (animating || totalPages <= 1) return
+    setAnimating(true)
+    setIndex((prev) => prev + 1)
+  }
 
-    // 무한 슬라이드용: [마지막페이지, ...원본, 첫페이지]
-    const loopPages = useMemo(() => {
-        if (totalPages <= 1) return pages
-        const first = pages[0]
-        const last = pages[totalPages - 1]
-        return [last, ...pages, first]
-    }, [pages, totalPages])
+  const goTo = (target: number) => {
+    if (animating || totalPages <= 1) return
+    setAnimating(true)
+    setIndex(target + 1)
+  }
 
-    // 현재 슬라이드 인덱스 (loopPages 기준)
-    // 0: 복제(last), 1..totalPages: 실제, lastIndex: 복제(first)
-    const [index, setIndex] = useState(0)
-
-    useEffect(() => {
-        if (totalPages <= 1) {
-            setIndex(0)
-            return
-        }
-
-        // 비동기 로딩 직후(0 -> N)에는 첫 실제 페이지(인덱스 1)로 맞춘다.
-        // 그렇지 않으면 clone(last)인 0번 슬라이드를 먼저 보게 된다.
-        if (index === 0 || index > totalPages) {
-            setIndex(1)
-        }
-    }, [index, totalPages])
-
-    // dot 표시용 현재 페이지(0..totalPages-1)
-    const page = totalPages <= 1 ? 0 : (index - 1 + totalPages) % totalPages
-
-    const [animating, setAnimating] = useState(false)
-    const [noTransition, setNoTransition] = useState(false)
-
-    const pendingJumpRef = useRef(false)
-
-    const goPrev = () => {
-        if (animating || totalPages <= 1) return
-        setAnimating(true)
-        setIndex((prev) => prev - 1)
+  const onTransitionEnd = () => {
+    if (totalPages <= 1) {
+      setAnimating(false)
+      return
     }
 
-    const goNext = () => {
-        if (animating || totalPages <= 1) return
-        setAnimating(true)
-        setIndex((prev) => prev + 1)
+    const lastIndex = loopPages.length - 1
+
+    if (pendingJumpRef.current) return
+
+    if (index === 0) {
+      pendingJumpRef.current = true
+      setNoTransition(true)
+      setIndex(totalPages)
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setNoTransition(false)
+          pendingJumpRef.current = false
+        })
+      })
+    } else if (index === lastIndex) {
+      pendingJumpRef.current = true
+      setNoTransition(true)
+      setIndex(1)
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setNoTransition(false)
+          pendingJumpRef.current = false
+        })
+      })
     }
 
-    const goTo = (target: number) => {
-        if (animating || totalPages <= 1) return
-        setAnimating(true)
-        setIndex(target + 1) // loopPages에서 실제 페이지는 +1 오프셋
-    }
+    setAnimating(false)
+  }
 
-    const onTransitionEnd = () => {
-        if (totalPages <= 1) {
-            setAnimating(false)
-            return
-        }
+  if (isLoading) return <p>로딩 중...</p>
+  if (error) return <p>에러가 발생했습니다.</p>
 
-        const lastIndex = loopPages.length - 1
+  return (
+    <section id="projects" className={styles.projects}>
+      <div className={styles.inner}>
+        <div className={styles.title}> Projects </div>
 
-        // 점프 중에 transitionEnd가 여러 번 들어올 수 있어서 방어
-        if (pendingJumpRef.current) return
+        <div className={styles.menu}>
+          <div className={styles.category}> All </div>
+          <div className={styles.category}> Frontend </div>
+          <div className={styles.category}> Backend </div>
+          <div className={styles.category}> Mobile </div>
+        </div>
 
-        if (index === 0) {
-            // clone(last) -> real(last)
-            pendingJumpRef.current = true
-            setNoTransition(true)
-            setIndex(totalPages)
+        <div className={styles.carousel}>
+          <button
+            type="button"
+            className={styles.arrow}
+            onClick={goPrev}
+            aria-label="Previous page"
+          >
+            <img src={prevIcon} alt="prev" />
+          </button>
 
-            // ⭐ 핵심: rAF 2번으로 "transition:none 적용 → 점프 반영"을 확실히 한 뒤 다시 켬
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    setNoTransition(false)
-                    pendingJumpRef.current = false
-                })
-            })
-        } else if (index === lastIndex) {
-            // clone(first) -> real(first)
-            pendingJumpRef.current = true
-            setNoTransition(true)
-            setIndex(1)
-
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    setNoTransition(false)
-                    pendingJumpRef.current = false
-                })
-            })
-        }
-
-        setAnimating(false)
-    }
-
-    if (isLoading) return <p>로딩 중...</p>
-    if (error) return <p>에러가 발생했습니다.</p>
-
-    return (
-        <section id="projects" className={styles.projects}>
-            <div className={styles.inner}>
-
-                {/* 제목 */}
-                <div className={styles.title}> Projects </div>
-
-                {/* 메뉴 */}
-                <div className={styles.menu}>
-                    <div className={styles.category}> All </div>
-                    <div className={styles.category}> Frontend </div>
-                    <div className={styles.category}> Backend </div>
-                    <div className={styles.category}> Mobile </div>
-                </div>
-
-                {/* 프로젝트 삽입 */}
-                <div className={styles.carousel}>
-
-                    <button
-                        type="button"
-                        className={styles.arrow}
-                        onClick={goPrev}
-                        aria-label="Previous page"
-                    >
-                        <img src={prevIcon} alt="prev" />
-                    </button>
-
-                    {/* viewport + track */}
-                    <div className={styles.viewport}>
+          <div className={styles.viewport}>
+            <div
+              className={`${styles.track} ${noTransition ? styles.noTransition : ''}`}
+              style={{ transform: `translateX(-${index * 100}%)` }}
+              onTransitionEnd={onTransitionEnd}
+            >
+              {loopPages.map((pageProjects, pIndex) => (
+                <div key={pIndex} className={styles.slide}>
+                  <div className={styles.cards}>
+                    {pageProjects.map((project, i) => (
+                      <div key={`${pIndex}-${project.project_id}-${i}`} className={styles.card}>
                         <div
-                            className={`${styles.track} ${noTransition ? styles.noTransition : ''}`}
-                            style={{ transform: `translateX(-${index * 100}%)` }}
-                            onTransitionEnd={onTransitionEnd}
-                        >
-                            {loopPages.map((pageProjects, pIndex) => (
-                                <div key={pIndex} className={styles.slide}>
-                                    <div className={styles.cards}>
-                                        {pageProjects.map((project, i) => (
-                                            <div key={`${pIndex}-${project.project_id}-${i}`} className={styles.card}>
+                          className={styles.image}
+                          style={
+                            project.img_url
+                              ? {
+                                  backgroundImage: `url(${project.img_url})`,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                }
+                              : undefined
+                          }
+                        ></div>
 
-                                                {/* 이미지 */}
-                                                <div
-                                                    className={styles.image}
-                                                    style={
-                                                        project.img_url
-                                                            ? {
-                                                                backgroundImage: `url(${project.img_url})`,
-                                                                backgroundSize: 'cover',
-                                                                backgroundPosition: 'center',
-                                                              }
-                                                            : undefined
-                                                    }
-                                                ></div>
+                        <div className={styles.content}>
+                          <div className={styles.projectTitle}>{project.title}</div>
+                          <div className={styles.projectDescription}>{project.description}</div>
 
-                                                {/* 프로젝트 컨텐츠 */}
-                                                <div className={styles.content}>
-
-                                                    {/* 제목 */}
-                                                    <div className={styles.projectTitle}>
-                                                        {project.title}
-                                                    </div>
-
-                                                    {/* 한줄 소개 */}
-                                                    <div className={styles.projectDescription}>
-                                                        {project.description}
-                                                    </div>
-
-                                                    {/* 스킬 */}
-                                                    <div className={styles.projectSkills}>
-                                                        {project.skills.map((skill) => (
-                                                            <div key={skill} className={styles.projectSkill}>
-                                                                {skill}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                    {/* 버튼 */}
-                                                    <div className={styles.buttons}>
-                                                        <a href={project.demoUrl} className={styles.button}>
-                                                            <img src={monitorIcon} alt="demo" />
-                                                            Live Demo
-                                                        </a>
-
-                                                        <a href={project.githubUrl} className={styles.button}>
-                                                            <img src={githubIcon} alt="github" />
-                                                            GitHub
-                                                        </a>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                          <div className={styles.projectSkills}>
+                            {project.skills.map((skill) => (
+                              <div key={skill} className={styles.projectSkill}>
+                                {skill}
+                              </div>
                             ))}
+                          </div>
+
+                          <div className={styles.buttons}>
+                            <a href={project.demoUrl} className={styles.button}>
+                              <img src={monitorIcon} alt="demo" />
+                              Live Demo
+                            </a>
+
+                            <a href={project.githubUrl} className={styles.button}>
+                              <img src={githubIcon} alt="github" />
+                              GitHub
+                            </a>
+                          </div>
                         </div>
-                    </div>
-
-                    <button
-                        type="button"
-                        className={styles.arrow}
-                        onClick={goNext}
-                        aria-label="Next page"
-                    >
-                        <img src={nextIcon} alt="next" />
-                    </button>
-
+                      </div>
+                    ))}
+                  </div>
                 </div>
-
-                {/* 페이징 */}
-                <div className={styles.paging}>
-
-                    <div className={styles.dots}>
-                        {Array.from({ length: totalPages }).map((_, i) => (
-                            <button
-                                key={i}
-                                type="button"
-                                className={`${styles.dot} ${i === page ? styles.dotActive : ''}`}
-                                onClick={() => goTo(i)}
-                            />
-                        ))}
-                    </div>
-
-                </div>
-
+              ))}
             </div>
-        </section>
-    )
+          </div>
+
+          <button
+            type="button"
+            className={styles.arrow}
+            onClick={goNext}
+            aria-label="Next page"
+          >
+            <img src={nextIcon} alt="next" />
+          </button>
+        </div>
+
+        <div className={styles.paging}>
+          <div className={styles.dots}>
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`${styles.dot} ${i === page ? styles.dotActive : ''}`}
+                onClick={() => goTo(i)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 export default Projects
