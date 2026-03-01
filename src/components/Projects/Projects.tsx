@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type TransitionEvent } from 'react'
 import styles from './Projects.module.css'
 import monitorIcon from '../../assets/icons/monitor.svg'
 import githubIcon from '../../assets/icons/github.png'
@@ -125,7 +125,7 @@ const Projects = () => {
 
     // 현재 슬라이드 인덱스 (loopPages 기준)
     // 0: 복제(last), 1..totalPages: 실제, lastIndex: 복제(first)
-    const [index, setIndex] = useState(0)
+    const [index, setIndex] = useState(1)
 
     useEffect(() => {
         if (totalPages <= 1) {
@@ -133,9 +133,7 @@ const Projects = () => {
             return
         }
 
-        // 비동기 로딩 직후(0 -> N)에는 첫 실제 페이지(인덱스 1)로 맞춘다.
-        // 그렇지 않으면 clone(last)인 0번 슬라이드를 먼저 보게 된다.
-        if (index === 0 || index > totalPages) {
+        if (index < 1 || index > totalPages) {
             setIndex(1)
         }
     }, [index, totalPages])
@@ -166,7 +164,8 @@ const Projects = () => {
         setIndex(target + 1) // loopPages에서 실제 페이지는 +1 오프셋
     }
 
-    const onTransitionEnd = () => {
+    const onTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
+        if (e.target !== e.currentTarget || e.propertyName !== 'transform') return
         if (totalPages <= 1) {
             setAnimating(false)
             return
