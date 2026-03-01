@@ -109,16 +109,26 @@ const Projects = () => {
     return [last, ...pages, first]
   }, [pages, totalPages])
 
-  const [index, setIndex] = useState(0)
+  const [index, setIndex] = useState(1)
   const [animating, setAnimating] = useState(false)
   const [noTransition, setNoTransition] = useState(false)
   const pendingJumpRef = useRef(false)
 
   useEffect(() => {
-    setIndex(totalPages <= 1 ? 0 : 1)
+    const targetIndex = totalPages <= 1 ? 0 : 1
+
+    // 첫 로딩(비동기 데이터 유입) 시 clone(last) -> first로 애니메이션이 보이지 않게,
+    // transition을 잠깐 끄고 시작 인덱스를 맞춘다.
+    setNoTransition(true)
+    setIndex(targetIndex)
     setAnimating(false)
-    setNoTransition(false)
     pendingJumpRef.current = false
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setNoTransition(false)
+      })
+    })
   }, [totalPages])
 
   const page = totalPages <= 1 ? 0 : (index - 1 + totalPages) % totalPages
