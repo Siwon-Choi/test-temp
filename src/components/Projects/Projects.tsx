@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type TransitionEvent } from 'react'
 import styles from './Projects.module.css'
 import monitorIcon from '../../assets/icons/monitor.svg'
 import githubIcon from '../../assets/icons/github.png'
@@ -125,7 +125,18 @@ const Projects = () => {
 
     // 현재 슬라이드 인덱스 (loopPages 기준)
     // 0: 복제(last), 1..totalPages: 실제, lastIndex: 복제(first)
-    const [index, setIndex] = useState(totalPages <= 1 ? 0 : 1)
+    const [index, setIndex] = useState(1)
+
+    useEffect(() => {
+        if (totalPages <= 1) {
+            setIndex(0)
+            return
+        }
+
+        if (index < 1 || index > totalPages) {
+            setIndex(1)
+        }
+    }, [index, totalPages])
 
     // dot 표시용 현재 페이지(0..totalPages-1)
     const page = totalPages <= 1 ? 0 : (index - 1 + totalPages) % totalPages
@@ -153,7 +164,8 @@ const Projects = () => {
         setIndex(target + 1) // loopPages에서 실제 페이지는 +1 오프셋
     }
 
-    const onTransitionEnd = () => {
+    const onTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
+        if (e.target !== e.currentTarget || e.propertyName !== 'transform') return
         if (totalPages <= 1) {
             setAnimating(false)
             return
