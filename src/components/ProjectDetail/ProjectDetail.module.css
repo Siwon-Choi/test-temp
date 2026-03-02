@@ -1,0 +1,137 @@
+.page {
+  min-height: 100vh;
+  padding: 48px 24px 80px;
+  background: linear-gradient(180deg, #d7ecff 0%, #d9e8f5 45%, #d2e3ee 100%);
+}
+
+.inner {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.backButton {
+  border: 0;
+  border-radius: 999px;
+  background: #1f5fff;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 10px 18px;
+  cursor: pointer;
+}
+
+.title {
+  margin: 18px 0 26px;
+  font-size: 48px;
+  font-weight: 900;
+  color: #101623;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 22px;
+}
+
+.metaCard {
+  background: #eef2f8;
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.metaCard h2 {
+  margin: 0;
+  color: #1f5fff;
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.metaCard p {
+  margin: 10px 0 24px;
+  font-size: 24px;
+  color: #1c2233;
+  line-height: 1.4;
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skillTag {
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+  background: #4a7df5;
+}
+
+.content h2 {
+  margin: 0;
+  font-size: 52px;
+  color: #101623;
+}
+
+.content > p {
+  margin: 14px 0 28px;
+  color: #172033;
+  line-height: 1.7;
+  font-size: 23px;
+}
+
+.skillCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.skillCard {
+  background: #d9e8f5;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.skillBadge {
+  display: inline-flex;
+  border-radius: 10px;
+  background: #4285f4;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 8px 14px;
+  margin-bottom: 10px;
+}
+
+.skillCard p {
+  margin: 0;
+  color: #1c2233;
+  line-height: 1.5;
+}
+
+.status {
+  min-height: 50vh;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  color: #1d2740;
+}
+
+@media (max-width: 920px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .skillCards {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .content h2 {
+    font-size: 34px;
+  }
+}

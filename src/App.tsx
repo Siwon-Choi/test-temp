@@ -1,12 +1,14 @@
+import { Route, Routes } from 'react-router-dom'
 import styles from './App.module.css'
 import Footer from './components/Footer/Footer'
 import Header from './components/Header/Header'
 import Home from './components/Home/Home'
 import Others from './components/Others/Others'
+import ProjectDetail from './components/ProjectDetail/ProjectDetail'
 import Projects from './components/Projects/Projects'
 import Skills from './components/Skills/Skills'
 
-function App() {
+function MainPage() {
   return (
     <div className={styles.app}>
       <Header />
@@ -18,6 +20,15 @@ function App() {
       </main>
       <Footer />
     </div>
+  )
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<MainPage />} />
+      <Route path="/projects/:slug" element={<ProjectDetail />} />
+    </Routes>
   )
 }
 
