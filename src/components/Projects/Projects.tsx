@@ -145,6 +145,7 @@ const Projects = () => {
     }, [filteredProjects])
 
     const totalPages = pages.length
+    const showArrows = totalPages > 1
 
 
     // 무한 케러셀(슬라이드) -> [마지막 페이지, 원본 페이지들, 첫 페이지]
@@ -293,15 +294,18 @@ const Projects = () => {
 
                 {/* 프로젝트 삽입 */}
                 <div className={styles.carousel}>
-
-                    <button
-                        type="button"
-                        className={styles.arrow}
-                        onClick={goPrev}
-                        aria-label="Previous page"
-                    >
-                        <img src={prevIcon} alt="prev" />
-                    </button>
+                    {showArrows ? (
+                        <button
+                            type="button"
+                            className={styles.arrow}
+                            onClick={goPrev}
+                            aria-label="Previous page"
+                        >
+                            <img src={prevIcon} alt="prev" />
+                        </button>
+                    ) : (
+                        <div className={styles.arrowSpacer} aria-hidden="true" />
+                    )}
 
                     {/* viewport */}
                     <div className={styles.viewport}>
@@ -383,14 +387,18 @@ const Projects = () => {
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        className={styles.arrow}
-                        onClick={goNext}
-                        aria-label="Next page"
-                    >
-                        <img src={nextIcon} alt="next" />
-                    </button>
+                    {showArrows ? (
+                        <button
+                            type="button"
+                            className={styles.arrow}
+                            onClick={goNext}
+                            aria-label="Next page"
+                        >
+                            <img src={nextIcon} alt="next" />
+                        </button>
+                    ) : (
+                        <div className={styles.arrowSpacer} aria-hidden="true" />
+                    )}
 
                 </div>
 
