@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useMemo, useRef, useState } from 'react'
 import styles from './Projects.module.css'
 import monitorIcon from '../../assets/icons/monitor.svg'
@@ -367,10 +368,10 @@ const Projects = () => {
 
                                                     {/* 버튼 */}
                                                     <div className={styles.buttons}>
-                                                        <a href={project.demoUrl} className={styles.button}>
-                                                            <img src={monitorIcon} alt="demo" />
-                                                            Live Demo
-                                                        </a>
+                                                        <Link to={`/projects/${project.slug}`} className={styles.button}>
+                                                            <img src={monitorIcon} alt="detail" />
+                                                            상세 보기
+                                                        </Link>
 
                                                         <a href={project.githubUrl} className={styles.button}>
                                                             <img src={githubIcon} alt="github" />
