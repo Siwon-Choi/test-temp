@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
-  padding: 48px 24px 80px;
-  background: linear-gradient(180deg, #d7ecff 0%, #d9e8f5 45%, #d2e3ee 100%);
+  padding: 112px 24px 80px;
+  background: linear-gradient(180deg, #dce9f7 0%, #e7eff7 100%);
 }
 
 .inner {
@@ -22,40 +22,44 @@
 
 .title {
   margin: 18px 0 26px;
-  font-size: 48px;
+  font-size: 46px;
   font-weight: 900;
   color: #101623;
+  letter-spacing: -0.4px;
 }
 
 .layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 22px;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
 }
 
 .metaCard {
-  background: #eef2f8;
+  background: #f2f5fa;
+  border: 1px solid #d3dbe7;
   border-radius: 20px;
   padding: 24px;
+  align-self: start;
 }
 
 .metaCard h2 {
   margin: 0;
   color: #1f5fff;
-  font-size: 32px;
+  font-size: 30px;
+  line-height: 1;
   font-weight: 900;
 }
 
 .metaCard p {
   margin: 10px 0 24px;
-  font-size: 24px;
+  font-size: 18px;
   color: #1c2233;
-  line-height: 1.4;
+  line-height: 1.25;
 }
 
 .skills {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -66,19 +70,21 @@
   font-weight: 900;
   color: #fff;
   background: #4a7df5;
+  justify-self: start;
 }
 
 .content h2 {
-  margin: 0;
-  font-size: 52px;
+  margin: 4px 0 10px;
+  font-size: 48px;
   color: #101623;
+  letter-spacing: -0.5px;
 }
 
 .content > p {
-  margin: 14px 0 28px;
+  margin: 0 0 28px;
   color: #172033;
-  line-height: 1.7;
-  font-size: 23px;
+  line-height: 1.5;
+  font-size: 18px;
 }
 
 .skillCards {
@@ -88,9 +94,11 @@
 }
 
 .skillCard {
-  background: #d9e8f5;
+  background: #ffffff;
+  border: 1px solid #cfd9e8;
   border-radius: 16px;
   padding: 18px;
+  box-shadow: 0 8px 20px rgba(20, 44, 84, 0.08);
 }
 
 .skillBadge {
@@ -108,6 +116,31 @@
   margin: 0;
   color: #1c2233;
   line-height: 1.5;
+  font-size: 18px;
+}
+
+.markdownSection {
+  margin-top: 28px;
+  background: #fff;
+  border: 1px solid #cfd9e8;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.markdownSection h3 {
+  margin: 0 0 12px;
+  font-size: 24px;
+  color: #1d2740;
+}
+
+.markdownContent {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #1f2737;
 }
 
 .status {
@@ -119,6 +152,10 @@
 }
 
 @media (max-width: 920px) {
+  .page {
+    padding-top: 96px;
+  }
+
   .layout {
     grid-template-columns: 1fr;
   }
@@ -128,10 +165,19 @@
   }
 
   .title {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .content h2 {
-    font-size: 34px;
+    font-size: 30px;
+  }
+
+  .content > p,
+  .metaCard p {
+    font-size: 17px;
+  }
+
+  .metaCard h2 {
+    font-size: 30px;
   }
 }
