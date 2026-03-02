@@ -43,14 +43,16 @@
 
 .carousel {
     margin-top: 28px;
-    display: grid;
-    grid-template-columns: 48px 1fr 48px;
+    display: flex;
     align-items: center;
     gap: 18px;
 }
 
+
 /* 넘치는 영역 숨기기 -> 넘기는 효과 연출 시 필요 */
 .viewport {
+    flex: 1 1 auto;
+    min-width: 0;
     overflow: hidden;
 }
 
@@ -223,7 +225,14 @@
     font-weight: 700;
 }
 
+.arrowSpacer {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+}
+
 .arrow {
+    flex: 0 0 48px;
     width: 48px;
     height: 48px;
     border-radius: 999px;
