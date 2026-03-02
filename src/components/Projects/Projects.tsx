@@ -44,6 +44,26 @@ type ProjectUI = {
     githubUrl: string
 }
 
+const ALL_CATEGORY = 'All'
+
+const normalizeCategory = (category: string | null) => {
+    if (!category) return null
+    return category.trim()
+}
+
+const getCategoryTone = (category: string | null) => {
+    const value = normalizeCategory(category)?.toLowerCase()
+
+    if (!value) return 'default'
+    if (value.includes('front')) return 'frontend'
+    if (value.includes('back')) return 'backend'
+    if (value.includes('mobile')) return 'mobile'
+    if (value.includes('iot')) return 'iot'
+    if (value.includes('devops')) return 'devops'
+
+    return 'default'
+}
+
 
 const Projects = () => {
     const { data: projects = [], isLoading, error } = useQuery<ProjectUI[]>({
@@ -92,17 +112,37 @@ const Projects = () => {
         },
     })
 
+    const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY)
+
+    const categories = useMemo(() => {
+        const unique = new Set(
+            projects
+                .map((project) => normalizeCategory(project.category))
+                .filter((category): category is string => Boolean(category)),
+        )
+
+        return [ALL_CATEGORY, ...Array.from(unique).sort((a, b) => a.localeCompare(b))]
+    }, [projects])
+
+    const selectedCategory = categories.includes(activeCategory) ? activeCategory : ALL_CATEGORY
+
+    const filteredProjects = useMemo(() => {
+        if (selectedCategory === ALL_CATEGORY) return projects
+
+        return projects.filter((project) => normalizeCategory(project.category) === selectedCategory)
+    }, [projects, selectedCategory])
+
 
     // 페이징
     const PAGE_SIZE = 4
 
     const pages = useMemo(() => {
         const out: typeof projects[] = []
-        for (let i = 0; i < projects.length; i += PAGE_SIZE) {
-            out.push(projects.slice(i, i + PAGE_SIZE))
+        for (let i = 0; i < filteredProjects.length; i += PAGE_SIZE) {
+            out.push(filteredProjects.slice(i, i + PAGE_SIZE))
         }
         return out
-    }, [projects])
+    }, [filteredProjects])
 
     const totalPages = pages.length
 
@@ -234,10 +274,16 @@ const Projects = () => {
 
                 {/* 메뉴 */}
                 <div className={styles.menu}>
-                    <div className={styles.category}> All </div>
-                    <div className={styles.category}> Frontend </div>
-                    <div className={styles.category}> Backend </div>
-                    <div className={styles.category}> Mobile </div>
+                    {categories.map((category) => (
+                        <button
+                            key={category}
+                            type="button"
+                            className={`${styles.category} ${selectedCategory === category ? styles.categoryActive : ''}`}
+                            onClick={() => setActiveCategory(category)}
+                        >
+                            {category}
+                        </button>
+                    ))}
                 </div>
 
                 {/* 프로젝트 삽입 */}
@@ -263,8 +309,11 @@ const Projects = () => {
                             {loopPages.map((pageProjects, pIndex) => (
                                 <div key={pIndex} className={styles.slide}>
                                     <div className={styles.cards}>
-                                        {pageProjects.map((project, i) => (
-                                            <div key={`${pIndex}-${project.project_id}-${i}`} className={styles.card}>
+                                        {pageProjects.map((project, i) => {
+                                            const category = normalizeCategory(project.category)
+                                            const categoryTone = getCategoryTone(category)
+
+                                            return <div key={`${pIndex}-${project.project_id}-${i}`} className={styles.card}>
 
                                                 {/* 이미지 */}
                                                 <div
@@ -295,6 +344,11 @@ const Projects = () => {
 
                                                     {/* 스킬 */}
                                                     <div className={styles.projectSkills}>
+                                                        {category && (
+                                                            <div className={`${styles.projectCategory} ${styles[`categoryTone_${categoryTone}`]}`}>
+                                                                {category}
+                                                            </div>
+                                                        )}
                                                         {project.skills.map((skill) => (
                                                             <div key={skill} className={styles.projectSkill}>
                                                                 {skill}
@@ -317,7 +371,7 @@ const Projects = () => {
 
                                                 </div>
                                             </div>
-                                        ))}
+                                        })}
                                     </div>
                                 </div>
                             ))}
@@ -338,16 +392,20 @@ const Projects = () => {
                 {/* 페이징 */}
                 <div className={styles.paging}>
 
-                    <div className={styles.dots}>
-                        {Array.from({ length: totalPages }).map((_, i) => (
-                            <button
-                                key={i}
-                                type="button"
-                                className={`${styles.dot} ${i === page ? styles.dotActive : ''}`}
-                                onClick={() => goTo(i)}
-                            />
-                        ))}
-                    </div>
+                    {totalPages > 0 ? (
+                        <div className={styles.dots}>
+                            {Array.from({ length: totalPages }).map((_, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    className={`${styles.dot} ${i === page ? styles.dotActive : ''}`}
+                                    onClick={() => goTo(i)}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <p className={styles.empty}>선택한 카테고리에 해당하는 프로젝트가 없습니다.</p>
+                    )}
 
                 </div>
 
