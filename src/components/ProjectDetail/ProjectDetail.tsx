@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../api/supabase'
+import Header from '../Header/Header'
 import styles from './ProjectDetail.module.css'
 
 type SkillRow = {
@@ -89,54 +90,65 @@ const ProjectDetail = () => {
   const role = project.role ?? '-'
   const duration = project.duration ?? '-'
   const contribution = project.contribution ?? '-'
-  const overview = project.readme || project.overview || '프로젝트 설명이 아직 등록되지 않았습니다.'
+  const overview = project.overview || '프로젝트 설명이 아직 등록되지 않았습니다.'
+  const markdown = project.readme || project.overview || ''
 
   return (
-    <section className={styles.page}>
-      <div className={styles.inner}>
-        <button type="button" className={styles.backButton} onClick={() => navigate(-1)}>
-          ← 뒤로가기
-        </button>
+    <>
+      <Header />
+      <section className={styles.page}>
+        <div className={styles.inner}>
+          <button type="button" className={styles.backButton} onClick={() => navigate(-1)}>
+            ← 뒤로가기
+          </button>
 
-        <h1 className={styles.title}>{project.title}</h1>
+          <h1 className={styles.title}>{project.title}</h1>
 
-        <div className={styles.layout}>
-          <aside className={styles.metaCard}>
-            <h2>Role</h2>
-            <p>{role}</p>
+          <div className={styles.layout}>
+            <aside className={styles.metaCard}>
+              <h2>Role</h2>
+              <p>{role}</p>
 
-            <h2>Duration</h2>
-            <p>{duration}</p>
+              <h2>Duration</h2>
+              <p>{duration}</p>
 
-            <h2>Project Contribution</h2>
-            <p>{contribution}</p>
+              <h2>Project Contribution</h2>
+              <p>{contribution}</p>
 
-            <h2>Tech Stack</h2>
-            <div className={styles.skills}>
-              {skillCards.map((skill) => (
-                <span key={skill.name} className={styles.skillTag}>
-                  {skill.name}
-                </span>
-              ))}
-            </div>
-          </aside>
+              <h2>Tech Stack</h2>
+              <div className={styles.skills}>
+                {skillCards.map((skill) => (
+                  <span key={skill.name} className={styles.skillTag}>
+                    {skill.name}
+                  </span>
+                ))}
+              </div>
+            </aside>
 
-          <main className={styles.content}>
-            <h2>Project Overview</h2>
-            <p>{overview}</p>
+            <main className={styles.content}>
+              <h2>Project Overview</h2>
+              <p>{overview}</p>
 
-            <div className={styles.skillCards}>
-              {skillCards.map((skill) => (
-                <article key={`${skill.name}-card`} className={styles.skillCard}>
-                  <span className={styles.skillBadge}>{skill.name}</span>
-                  <p>{skill.reason}</p>
-                </article>
-              ))}
-            </div>
-          </main>
+              <div className={styles.skillCards}>
+                {skillCards.map((skill) => (
+                  <article key={`${skill.name}-card`} className={styles.skillCard}>
+                    <span className={styles.skillBadge}>{skill.name}</span>
+                    <p>{skill.reason}</p>
+                  </article>
+                ))}
+              </div>
+
+              {markdown && (
+                <section className={styles.markdownSection}>
+                  <h3>Markdown</h3>
+                  <pre className={styles.markdownContent}>{markdown}</pre>
+                </section>
+              )}
+            </main>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }
 
