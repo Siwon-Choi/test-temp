@@ -47,11 +47,12 @@ type ProjectUI = {
 
 const ALL_CATEGORY = 'All'
 
+// 대문자 -> 소문자
 const normalizeCategory = (category: string | null) => {
     if (!category) return null
     return category.trim()
 }
-
+// Front, front-end 이런 표기들 싹 매핑
 const getCategoryTone = (category: string | null) => {
     const value = normalizeCategory(category)?.toLowerCase()
 
