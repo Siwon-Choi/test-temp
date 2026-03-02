@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import styles from './App.module.css'
 import Footer from './components/Footer/Footer'
 import Header from './components/Header/Header'
@@ -9,6 +10,20 @@ import Projects from './components/Projects/Projects'
 import Skills from './components/Skills/Skills'
 
 function MainPage() {
+  const location = useLocation()
+
+  useEffect(() => {
+    const sectionId = location.hash.replace('#', '')
+
+    if (!sectionId) {
+      return
+    }
+
+    requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' })
+    })
+  }, [location.hash])
+
   return (
     <div className={styles.app}>
       <Header />
