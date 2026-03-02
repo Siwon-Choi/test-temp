@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 
 const Header = () => {
@@ -20,7 +20,7 @@ const Header = () => {
                 .getElementById(sectionId)
                 ?.scrollIntoView({ behavior: "smooth" });
 
-            navigate(`/#${sectionId}`, { replace: true });
+            window.history.replaceState(null, "", `/#${sectionId}`);
             return;
         }
 
@@ -34,6 +34,7 @@ const Header = () => {
                 onClick={() => {
                     if (location.pathname === "/") {
                         document.getElementById("home")?.scrollIntoView({ behavior: "smooth" });
+                        window.history.replaceState(null, "", "/#home");
                     } else {
                         navigate("/#home");
                     }
