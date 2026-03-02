@@ -44,15 +44,6 @@ type ProjectUI = {
     githubUrl: string
 }
 
-const CATEGORY_ORDER = [
-    'Frontend',
-    'Backend',
-    'Mobile',
-    'DevOps',
-    'Database',
-    'Embedded',
-]
-
 
 const Projects = () => {
     const { data: projects = [], isLoading, error } = useQuery<ProjectUI[]>({
@@ -102,46 +93,16 @@ const Projects = () => {
     })
 
 
-
-    const categories = useMemo(() => {
-        const set = new Set<string>()
-
-        projects.forEach((p) => {
-            if (p.category) set.add(p.category)
-        })
-
-        const sorted = Array.from(set).sort((a, b) => {
-            const ai = CATEGORY_ORDER.indexOf(a)
-            const bi = CATEGORY_ORDER.indexOf(b)
-
-            const aRank = ai === -1 ? 999 : ai
-            const bRank = bi === -1 ? 999 : bi
-
-            if (aRank !== bRank) return aRank - bRank
-            return a.localeCompare(b)
-        })
-
-        return ['All', ...sorted]
-    }, [projects])
-
-    const [selectedCategory, setSelectedCategory] = useState('All')
-
-    const filteredProjects = useMemo(() => {
-        if (selectedCategory === 'All') return projects
-        return projects.filter((p) => p.category === selectedCategory)
-    }, [projects, selectedCategory])
-
-
     // 페이징
     const PAGE_SIZE = 4
 
     const pages = useMemo(() => {
-        const out: typeof filteredProjects[] = []
-        for (let i = 0; i < filteredProjects.length; i += PAGE_SIZE) {
-            out.push(filteredProjects.slice(i, i + PAGE_SIZE))
+        const out: typeof projects[] = []
+        for (let i = 0; i < projects.length; i += PAGE_SIZE) {
+            out.push(projects.slice(i, i + PAGE_SIZE))
         }
         return out
-    }, [filteredProjects])
+    }, [projects])
 
     const totalPages = pages.length
 
@@ -186,12 +147,6 @@ const Projects = () => {
             })
         })
     }, [totalPages])
-
-    useEffect(() => {
-        if (totalPages > 1) {
-            setIndex(1)
-        }
-    }, [selectedCategory])
 
 
     // 이전 페이지로 이동
@@ -279,20 +234,10 @@ const Projects = () => {
 
                 {/* 메뉴 */}
                 <div className={styles.menu}>
-                    {categories.map((cat) => (
-                        <div
-                            key={cat}
-                            className={styles.category}
-                            onClick={() => setSelectedCategory(cat)}
-                            style={
-                                selectedCategory === cat
-                                    ? { background: '#f0916b', color: '#1a2334' }
-                                    : undefined
-                            }
-                        >
-                            {cat}
-                        </div>
-                    ))}
+                    <div className={styles.category}> All </div>
+                    <div className={styles.category}> Frontend </div>
+                    <div className={styles.category}> Backend </div>
+                    <div className={styles.category}> Mobile </div>
                 </div>
 
                 {/* 프로젝트 삽입 */}
