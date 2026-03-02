@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import styles from './Projects.module.css'
 import monitorIcon from '../../assets/icons/monitor.svg'
 import githubIcon from '../../assets/icons/github.png'
@@ -155,8 +155,10 @@ const Projects = () => {
         return [last, ...pages, first]
     }, [pages, totalPages])
 
-    // 한 페이지가 아니라면, 첫 페이지는 1번 인덱스로 설정(0번 인덱스는 마지막 페이지기 때문이다.)
-    const [index, setIndex] = useState(totalPages <= 1 ? 0 : 1)
+    // 캐러셀 인덱스(무한 루프 구성 시 기본 시작점은 1)
+    const [index, setIndex] = useState(1)
+
+    const trackIndex = totalPages <= 1 ? 0 : index
 
     // dot 표시용 현재 페이지
     const page = totalPages <= 1 ? 0 : (index - 1 + totalPages) % totalPages
@@ -171,22 +173,25 @@ const Projects = () => {
     const pendingJumpRef = useRef(false)
 
 
-    // supabase 연동 시 마지막 페이지가 먼저 뜨는 현상 해결
-    useEffect(() => {
-        const targetIndex = totalPages <= 1 ? 0 : 1
+    const resetCarousel = () => {
+        const targetIndex = 1
 
-        // transition을 끄고 시작 인덱스 맞추기
         setNoTransition(true)
-        setIndex(targetIndex)
         setAnimating(false)
         pendingJumpRef.current = false
+        setIndex(targetIndex)
 
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 setNoTransition(false)
             })
         })
-    }, [totalPages])
+    }
+
+    const onCategoryChange = (category: string) => {
+        setActiveCategory(category)
+        resetCarousel()
+    }
 
 
     // 이전 페이지로 이동
@@ -279,7 +284,7 @@ const Projects = () => {
                             key={category}
                             type="button"
                             className={`${styles.category} ${selectedCategory === category ? styles.categoryActive : ''}`}
-                            onClick={() => setActiveCategory(category)}
+                            onClick={() => onCategoryChange(category)}
                         >
                             {category}
                         </button>
@@ -303,7 +308,7 @@ const Projects = () => {
                         {/* track */}
                         <div
                             className={`${styles.track} ${noTransition ? styles.noTransition : ''}`}
-                            style={{ transform: `translateX(-${index * 100}%)` }}
+                            style={{ transform: `translateX(-${trackIndex * 100}%)` }}
                             onTransitionEnd={onTransitionEnd}
                         >
                             {loopPages.map((pageProjects, pIndex) => (
