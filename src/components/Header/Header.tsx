@@ -15,6 +15,15 @@ const Header = () => {
     ) => {
         e.preventDefault();
 
+        if (location.pathname === "/") {
+            document
+                .getElementById(sectionId)
+                ?.scrollIntoView({ behavior: "smooth" });
+
+            window.history.replaceState(null, "", `/#${sectionId}`);
+            return;
+        }
+
         navigate(`/#${sectionId}`);
     };
 
@@ -23,7 +32,12 @@ const Header = () => {
             <div
                 className={styles.logo}
                 onClick={() => {
-                    navigate("/#home");
+                    if (location.pathname === "/") {
+                        document.getElementById("home")?.scrollIntoView({ behavior: "smooth" });
+                        window.history.replaceState(null, "", "/#home");
+                    } else {
+                        navigate("/#home");
+                    }
                 }}
                 role="button"
                 tabIndex={0}

@@ -46,6 +46,10 @@ table {
   --header-h: 72px;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   padding-top: var(--header-h);
 }
