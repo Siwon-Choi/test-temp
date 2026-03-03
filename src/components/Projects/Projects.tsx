@@ -136,7 +136,7 @@ const Projects = () => {
 
 
     // 페이징
-    const PAGE_SIZE = 4
+    const PAGE_SIZE = 3
 
     const pages = useMemo(() => {
         const out: typeof projects[] = []
@@ -320,6 +320,10 @@ const Projects = () => {
                             {loopPages.map((pageProjects, pIndex) => (
                                 <div key={pIndex} className={styles.slide}>
                                     <div className={styles.cards}>
+                                        <button type="button" className={styles.addCard} aria-label="프로젝트 추가">
+                                            <span className={styles.addPlus}>+</span>
+                                        </button>
+
                                         {pageProjects.map((project, i) => {
                                             const category = normalizeCategory(project.category)
                                             const categoryTone = getCategoryTone(category)
