@@ -170,9 +170,16 @@
   border: 1px solid #cfd8e1;
 }
 
+.editIcon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
 .addBadge {
   border: none;
   background: #2f6df6;
   color: #fff;
   cursor: pointer;
 }
+

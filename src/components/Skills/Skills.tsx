@@ -6,6 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../api/supabase";
 import { useEffect, useState } from "react";
 import { isAuthenticated } from "../../utils/authStorage";
+import EditIcon from "../../assets/icons/edit.svg";
+
+type EditMode = "delete" | "edit" | "add" | null;
 
 // 데이터
 type SkillRowDB = {
@@ -19,8 +22,6 @@ type SkillRowUI = {
     items: string[];
 };
 
-type EditMode = "delete" | "edit" | "add" | null;
-
 // 카테고리에 아이콘 매핑
 const CATEGORY_ICONS: Record<string, string> = {
     Language: LanguageIcon,
@@ -30,7 +31,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 
 const CHIP_COLORS = [
-    "#2f6df6", 
+    "#2f6df6",
     "#7c4dff",
     "#00b894",
     "#ff7675",
@@ -187,11 +188,11 @@ const Skills = () => {
                         return (
                             <div key={row.category} className={styles.row}>
                                 <div className={styles.iconBox}>
-                                    <img 
-                                        className={styles.iconImg} 
-                                        src={iconSrc} 
-                                        alt="" 
-                                        aria-hidden 
+                                    <img
+                                        className={styles.iconImg}
+                                        src={iconSrc}
+                                        alt=""
+                                        aria-hidden
                                     />
                                 </div>
 
@@ -214,7 +215,9 @@ const Skills = () => {
                                             ) : null}
 
                                             {loggedIn && editMode === "edit" ? (
-                                                <span className={`${styles.modeBadge} ${styles.editBadge}`}>o</span>
+                                                <span className={`${styles.modeBadge} ${styles.editBadge}`} aria-hidden>
+                                                    <img src={EditIcon} alt="" className={styles.editIcon} />
+                                                </span>
                                             ) : null}
                                         </div>
                                     ))}
