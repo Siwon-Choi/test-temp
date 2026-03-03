@@ -11,10 +11,3 @@ section {
 .homeSection{
   height: calc(100vh - 72px); 
 }
-
-@media (max-width: 1023px) {
-  .homeSection {
-    height: auto;
-    min-height: calc(100vh - 72px);
-  }
-}
