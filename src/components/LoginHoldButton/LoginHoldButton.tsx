@@ -1,44 +1,59 @@
 import { useRef, useState } from 'react'
-import { supabase } from '../../api/supabase'
-import vectorIcon from '../../assets/icons/vector.svg'
-import { clearAuthSession, isAuthenticated, setAuthSession } from '../../utils/authStorage'
 import styles from './LoginHoldButton.module.css'
-
-const HOLD_DURATION = 3000
-const PROGRESS_VISIBLE_DELAY = 300
+import vectorIcon from '../../assets/icons/vector.svg'
+import { supabase } from '../../api/supabase'
+import { clearAuthSession, isAuthenticated, setAuthSession } from '../../utils/authStorage'
 
 type ModalType = 'login' | 'logout' | null
 
+// 로그인 버튼을 위한 시간
+const HOLD_DURATION = 2000
+// up 버튼으로 동작하는 시간 (delay)
+const PROGRESS_VISIBLE_DELAY = 300
+
+// 로그인 버튼 기능
 function LoginHoldButton() {
+  // 진행률
   const [progress, setProgress] = useState(0)
+  // 버튼 누르고 있는지의 여부
   const [isHolding, setIsHolding] = useState(false)
+
   const [modalType, setModalType] = useState<ModalType>(null)
 
+  // 누르기 시작한 시점 저장
+  const holdStartTimeRef = useRef<number | null>(null)
+  // requestAnimationFrame id 저장
+  const rafRef = useRef<number | null>(null)
+  // 로그인 트리거가 이미 실행됐는지 체크
+  const loginTriggeredRef = useRef(false)
+
+  // 로그인
   const [loginId, setLoginId] = useState('')
   const [loginPw, setLoginPw] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
-
-  const holdStartTimeRef = useRef<number | null>(null)
-  const rafRef = useRef<number | null>(null)
-  const actionTriggeredRef = useRef(false)
 
   const resetLoginForm = () => {
     setLoginId('')
     setLoginPw('')
   }
 
+  // 홀드 상태 초기화 함수
   const resetHoldingState = () => {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current)
       rafRef.current = null
     }
+
     holdStartTimeRef.current = null
     setIsHolding(false)
     setProgress(0)
   }
 
+  // 프레임마다 진행률 업데이트
   const updateProgress = (timestamp: number) => {
-    if (holdStartTimeRef.current === null) holdStartTimeRef.current = timestamp
+    if (holdStartTimeRef.current === null) {
+      holdStartTimeRef.current = timestamp
+    }
 
     const elapsed = timestamp - holdStartTimeRef.current
     const effectiveElapsed = Math.max(elapsed - PROGRESS_VISIBLE_DELAY, 0)
@@ -46,40 +61,45 @@ function LoginHoldButton() {
     const nextProgress = Math.min(effectiveElapsed / progressDuration, 1)
     setProgress(nextProgress)
 
+    // 지정 시간 이상 누르면 로그인 팝업 실행
     if (elapsed >= HOLD_DURATION) {
       setIsHolding(false)
       const authenticated = isAuthenticated()
       if (!authenticated) {
         resetLoginForm()
       }
-      setModalType(authenticated ? 'logout' : 'login')
+      setModalType(isAuthenticated() ? 'logout' : 'login')
       holdStartTimeRef.current = null
       rafRef.current = null
-      actionTriggeredRef.current = true
+      loginTriggeredRef.current = true
       return
     }
 
+    // 다음 프레임 요청
     rafRef.current = requestAnimationFrame(updateProgress)
   }
 
+  // 마우스/터치로 누르기 시작
   const startHold = () => {
     if (modalType || isHolding) return
 
-    actionTriggeredRef.current = false
+    loginTriggeredRef.current = false
     setIsHolding(true)
     setProgress(0)
     holdStartTimeRef.current = null
     rafRef.current = requestAnimationFrame(updateProgress)
   }
 
+  // 누르기 중단 시 초기화
   const stopHold = () => {
     if (!isHolding) return
     resetHoldingState()
   }
 
+  // 일반 클릭 시 맨 위로 스크롤
   const handleClick = () => {
-    if (actionTriggeredRef.current) {
-      actionTriggeredRef.current = false
+    if (loginTriggeredRef.current) {
+      loginTriggeredRef.current = false
       return
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -119,9 +139,7 @@ function LoginHoldButton() {
         .maybeSingle()
 
       if (error) throw error
-
       if (data?.id) {
-        resetLoginForm()
         setAuthSession({
           userId: data.id,
           authenticatedAt: new Date().toISOString(),
@@ -140,6 +158,7 @@ function LoginHoldButton() {
     }
   }
 
+  // 진행률을 각도로 변환
   const progressAngle = `${progress * 360}deg`
 
   return (
@@ -156,17 +175,20 @@ function LoginHoldButton() {
         onClick={handleClick}
         aria-label="맨 위로 이동"
       >
+        {/* 원형 프로그레스 레이어 */}
         <span
           className={styles.progressLayer}
           style={{
             backgroundImage: `conic-gradient(var(--progress-color) ${progressAngle}, transparent 0deg)`,
           }}
         />
+        {/* 버튼 내부 화살표 */}
         <span className={styles.buttonInner} aria-hidden="true">
-          <img src={vectorIcon} alt="" className={styles.icon} />
+          <img src={vectorIcon} alt="" />
         </span>
       </button>
 
+      {/* 로그인 */}
       {modalType === 'login' ? (
         <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="로그인 팝업">
           <div className={styles.modalCard}>
@@ -197,7 +219,7 @@ function LoginHoldButton() {
                 onClick={handleLogin}
                 disabled={isLoggingIn}
               >
-                {isLoggingIn ? '로그인 중...' : '로그인'}
+                {isLoggingIn ? '로그인 중' : '로그인'}
               </button>
             </div>
 
