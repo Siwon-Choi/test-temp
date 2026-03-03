@@ -1,0 +1,41 @@
+.wrapper {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scrollTopButton,
+.authStatus {
+  width: 52px;
+  height: 52px;
+  border: none;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.scrollTopButton {
+  cursor: pointer;
+  background: #f8f8f8;
+  color: #222;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.scrollTopButton:hover {
+  transform: translateY(-1px);
+}
+
+.authStatus {
+  background: #e0ef45;
+  color: #111;
+  font-size: 14px;
+  cursor: default;
+}
