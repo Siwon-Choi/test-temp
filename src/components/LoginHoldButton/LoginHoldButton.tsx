@@ -22,6 +22,11 @@ function LoginHoldButton() {
   const rafRef = useRef<number | null>(null)
   const actionTriggeredRef = useRef(false)
 
+  const resetLoginForm = () => {
+    setLoginId('')
+    setLoginPw('')
+  }
+
   const resetHoldingState = () => {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current)
@@ -43,7 +48,11 @@ function LoginHoldButton() {
 
     if (elapsed >= HOLD_DURATION) {
       setIsHolding(false)
-      setModalType(isAuthenticated() ? 'logout' : 'login')
+      const authenticated = isAuthenticated()
+      if (!authenticated) {
+        resetLoginForm()
+      }
+      setModalType(authenticated ? 'logout' : 'login')
       holdStartTimeRef.current = null
       rafRef.current = null
       actionTriggeredRef.current = true
@@ -77,6 +86,7 @@ function LoginHoldButton() {
   }
 
   const closeModal = () => {
+    resetLoginForm()
     setModalType(null)
   }
 
@@ -111,6 +121,7 @@ function LoginHoldButton() {
       if (error) throw error
 
       if (data?.id) {
+        resetLoginForm()
         setAuthSession({
           userId: data.id,
           authenticatedAt: new Date().toISOString(),
