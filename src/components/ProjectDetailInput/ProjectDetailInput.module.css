@@ -62,6 +62,7 @@
 
 .input,
 .textarea,
+.select,
 .titleInput,
 .subtitleInput,
 .contentInput {
@@ -76,7 +77,8 @@
 }
 
 .input,
-.textarea {
+.textarea,
+.select {
   margin-top: 10px;
 }
 
@@ -234,4 +236,23 @@
   margin: 0;
   font-size: 16px;
   color: #1c2233;
+}
+
+.previewMeta {
+  margin: 0 0 16px;
+  color: #39517e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.submitButton {
+  justify-self: end;
+  border: 0;
+  border-radius: 999px;
+  background: #1f5fff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  padding: 12px 22px;
+  cursor: pointer;
 }

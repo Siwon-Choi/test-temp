@@ -1,16 +1,26 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../Header/Header'
-import styles from './ProjectDetailInput.module.css'
-
+import { useQuery } from '@tanstack/react-query'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { supabase } from '../../api/supabase'
+import Header from '../Header/Header'
+import styles from './ProjectDetailInput.module.css'
 
 type SkillInput = {
     id: number
     name: string
     reason: string
+    category: string
+    isNew: boolean
 }
+
+type SkillRow = {
+    name: string
+}
+
+const SKILL_CATEGORY_ORDER = ['Language', 'Frontend', 'Backend', 'Mobile', 'DevOps', 'Database', 'Embedded']
+const PROJECT_CATEGORY_OPTIONS = ['frontend', 'backend', 'mobile', 'iot', 'devops', 'default']
 
 const ProjectDetailInput = () => {
     const navigate = useNavigate()
@@ -22,30 +32,67 @@ const ProjectDetailInput = () => {
     const [role, setRole] = useState('')
     const [duration, setDuration] = useState('')
     const [contribution, setContribution] = useState('')
-    const [category, setCategory] = useState('')
+    const [projectCategory, setProjectCategory] = useState(PROJECT_CATEGORY_OPTIONS[0])
     const [imageUrl, setImageUrl] = useState('')
 
     const [skills, setSkills] = useState<SkillInput[]>([])
     const [skillNameDraft, setSkillNameDraft] = useState('')
     const [skillReasonDraft, setSkillReasonDraft] = useState('')
+    const [skillCategoryDraft, setSkillCategoryDraft] = useState(SKILL_CATEGORY_ORDER[0])
     const [selectedSkillName, setSelectedSkillName] = useState('')
+
+    const { data: existingSkillNames = [] } = useQuery<string[]>({
+        queryKey: ['skill-name-list'],
+        queryFn: async () => {
+            const { data, error } = await supabase.from('skill').select('name')
+            if (error) throw error
+            return ((data ?? []) as SkillRow[]).map((row) => row.name.toLowerCase())
+        },
+    })
 
     const addSkill = () => {
         const name = skillNameDraft.trim()
-        if (!name) return
+        if (!name) {
+            window.alert('스킬 이름을 입력해주세요.')
+            return
+        }
 
-        if (skills.some((skill) => skill.name.toLowerCase() === name.toLowerCase())) return
+        if (skills.some((skill) => skill.name.toLowerCase() === name.toLowerCase())) {
+            window.alert('이미 추가된 스킬입니다.')
+            return
+        }
+
+        const isNewSkill = !existingSkillNames.includes(name.toLowerCase())
+
+        if (isNewSkill) {
+            const ok = window.confirm(`${name}은(는) 기존 Skill에 없습니다. 최종 추가 시 Skill 컴포넌트에 새 스킬로 추가할까요?`)
+            if (!ok) return
+            window.alert('최종 추가 시 Skill 컴포넌트에 추가됩니다.')
+        }
 
         const nextSkill: SkillInput = {
             id: Date.now(),
             name,
             reason: skillReasonDraft.trim(),
+            category: skillCategoryDraft,
+            isNew: isNewSkill,
         }
 
         setSkills((prev) => [...prev, nextSkill])
         setSelectedSkillName(name)
         setSkillNameDraft('')
         setSkillReasonDraft('')
+        setSkillCategoryDraft(SKILL_CATEGORY_ORDER[0])
+    }
+
+    const onSubmit = () => {
+        if (!title.trim()) {
+            window.alert('TITLE을 입력해주세요.')
+            return
+        }
+
+        const newSkillCount = skills.filter((skill) => skill.isNew).length
+        window.alert(`프로젝트 추가 준비가 완료되었습니다.\n(연결 예정) 신규 스킬 ${newSkillCount}개는 Skill 컴포넌트에도 반영됩니다.`)
     }
 
     const selectedSkill = useMemo(() => {
@@ -67,77 +114,43 @@ const ProjectDetailInput = () => {
             <section className={styles.page}>
                 <div className={styles.shell}>
                     <aside className={styles.sidebar}>
-                        <button
-                            type="button"
-                            className={styles.backButton}
-                            onClick={() => navigate(-1)}
-                        >
+                        <button type="button" className={styles.backButton} onClick={() => navigate(-1)}>
                             뒤로가기
                         </button>
 
                         <div className={styles.metaCard}>
                             <h2>Role</h2>
-                            <input
-                                className={styles.input}
-                                value={role}
-                                onChange={(event) => setRole(event.target.value)}
-                                placeholder="예: Frontend Developer"
-                            />
+                            <input className={styles.input} value={role} onChange={(event) => setRole(event.target.value)} placeholder="예: Frontend Developer" />
 
                             <h2>Duration</h2>
-                            <input
-                                className={styles.input}
-                                value={duration}
-                                onChange={(event) => setDuration(event.target.value)}
-                                placeholder="예: 2024.03 - 2024.05"
-                            />
+                            <input className={styles.input} value={duration} onChange={(event) => setDuration(event.target.value)} placeholder="예: 2024.03 - 2024.05" />
 
                             <h2>Project Contribution</h2>
-                            <textarea
-                                className={styles.textarea}
-                                value={contribution}
-                                onChange={(event) => setContribution(event.target.value)}
-                                placeholder="프로젝트 기여도를 입력하세요."
-                                rows={3}
-                            />
+                            <textarea className={styles.textarea} value={contribution} onChange={(event) => setContribution(event.target.value)} placeholder="프로젝트 기여도를 입력하세요." rows={3} />
 
-                            <h2>Category</h2>
-                            <input
-                                className={styles.input}
-                                value={category}
-                                onChange={(event) => setCategory(event.target.value)}
-                                placeholder="예: Frontend"
-                            />
+                            <h2>Project Category</h2>
+                            <select className={styles.select} value={projectCategory} onChange={(event) => setProjectCategory(event.target.value)}>
+                                {PROJECT_CATEGORY_OPTIONS.map((option) => (
+                                    <option key={option} value={option}>{option}</option>
+                                ))}
+                            </select>
 
                             <h2>Image URL</h2>
-                            <input
-                                className={styles.input}
-                                value={imageUrl}
-                                onChange={(event) => setImageUrl(event.target.value)}
-                                placeholder="로컬 이미지 URL을 입력하세요."
-                            />
+                            <input className={styles.input} value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="로컬 이미지 URL을 입력하세요." />
 
                             <div className={styles.techStackHeader}>
                                 <h2>Tech Stack</h2>
-                                <button type="button" className={styles.addSkillButton} onClick={addSkill} aria-label="스킬 추가">
-                                    +
-                                </button>
+                                <button type="button" className={styles.addSkillButton} onClick={addSkill} aria-label="스킬 추가">+</button>
                             </div>
 
                             <div className={styles.skillComposer}>
-                                <input
-                                    className={styles.input}
-                                    value={skillNameDraft}
-                                    onChange={(event) => setSkillNameDraft(event.target.value)}
-                                    placeholder="스킬 이름"
-                                />
-                                <textarea
-                                    className={styles.textarea}
-                                    value={skillReasonDraft}
-                                    onChange={(event) => setSkillReasonDraft(event.target.value)}
-                                    placeholder="스킬 사용 이유 (선택)"
-                                    rows={2}
-                                />
+                                <input className={styles.input} value={skillNameDraft} onChange={(event) => setSkillNameDraft(event.target.value)} placeholder="스킬 이름" />
+                                <select className={styles.select} value={skillCategoryDraft} onChange={(event) => setSkillCategoryDraft(event.target.value)}>
+                                    {SKILL_CATEGORY_ORDER.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <textarea className={styles.textarea} value={skillReasonDraft} onChange={(event) => setSkillReasonDraft(event.target.value)} placeholder="스킬 사용 이유 (선택)" rows={2} />
                             </div>
 
                             <div className={styles.skills}>
@@ -157,31 +170,23 @@ const ProjectDetailInput = () => {
                         {selectedSkill && (
                             <article className={`${styles.skillCard} ${styles.sidebarSkillCard}`}>
                                 <span className={styles.skillBadge}>{selectedSkill.name}</span>
-                                <p>{selectedSkill.reason || '스킬 사용 이유가 아직 입력되지 않았습니다.'}</p>
+                                <p>
+                                    카테고리: {selectedSkill.category}
+                                    <br />
+                                    {selectedSkill.reason || '스킬 사용 이유가 아직 입력되지 않았습니다.'}
+                                </p>
                             </article>
                         )}
                     </aside>
 
                     <main className={styles.main}>
                         <header className={styles.contentHeader}>
-                            <input
-                                className={styles.titleInput}
-                                value={title}
-                                onChange={(event) => setTitle(event.target.value)}
-                                placeholder="TITLE"
-                            />
-                            <input
-                                className={styles.subtitleInput}
-                                value={subtitle}
-                                onChange={(event) => setSubtitle(event.target.value)}
-                                placeholder="SUBTITLE"
-                            />
+                            <input className={styles.titleInput} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="TITLE" />
+                            <input className={styles.subtitleInput} value={subtitle} onChange={(event) => setSubtitle(event.target.value)} placeholder="SUBTITLE" />
                         </header>
 
                         <section className={styles.markdownSection}>
-                            {imageUrl.trim() ? (
-                                <img className={styles.previewImage} src={imageUrl} alt="프로젝트 미리보기" />
-                            ) : null}
+                            {imageUrl.trim() ? <img className={styles.previewImage} src={imageUrl} alt="프로젝트 미리보기" /> : null}
                             <textarea
                                 className={styles.contentInput}
                                 value={content}
@@ -195,12 +200,15 @@ const ProjectDetailInput = () => {
                             <h3>Preview</h3>
                             <h1 className={styles.projectTitle}>{resolvedTitle}</h1>
                             <p className={styles.projectSubtitle}>{resolvedSubtitle}</p>
+                            <p className={styles.previewMeta}>Project Category: {projectCategory}</p>
                             <div className={styles.markdownBody}>
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {content}
-                                </ReactMarkdown>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                             </div>
                         </section>
+
+                        <button type="button" className={styles.submitButton} onClick={onSubmit}>
+                            최종 추가하기
+                        </button>
                     </main>
                 </div>
             </section>
