@@ -7,8 +7,6 @@ import Others from './components/Others/Others'
 import Projects from './components/Projects/Projects'
 import Skills from './components/Skills/Skills'
 import ProjectDetail from './components/ProjectDetail/ProjectDetail'
-import FloatingQuickActions from './components/FloatingQuickActions/FloatingQuickActions'
-import { AuthProvider } from './context/AuthContext'
 
 function MainPage() {
   return (
@@ -27,13 +25,10 @@ function MainPage() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/projects/:slug" element={<ProjectDetail />} />
-      </Routes>
-      <FloatingQuickActions />
-    </AuthProvider>
+    <Routes>
+      <Route path="/" element={<MainPage />} />
+      <Route path="/projects/:slug" element={<ProjectDetail />} />
+    </Routes>
   )
 }
 export default App

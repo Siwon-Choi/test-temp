@@ -74,19 +74,28 @@
 
 .skills {
   margin-top: 12px;
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
-  gap: 10px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .skillTag {
+  border: 1px solid transparent;
   border-radius: 999px;
   padding: 6px 14px;
   font-size: 12px;
   font-weight: 800;
+  color: #214cb9;
+  background: #dce8ff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.skillTagActive {
   color: #fff;
   background: #4a7df5;
-  white-space: nowrap;
+  border-color: #4a7df5;
 }
 
 
@@ -104,7 +113,6 @@
 
 
 .contentHeader,
-.skillCards,
 .markdownSection {
   width: 100%;
 }
@@ -131,11 +139,6 @@
   word-break: break-word;
 }
 
-.skillCards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
 
 .skillCard {
   background: #ffffff;
@@ -144,6 +147,16 @@
   padding: 18px;
   box-shadow: 0 8px 20px rgba(20, 44, 84, 0.08);
   min-width: 0;
+}
+
+.sidebarSkillCard {
+  background: #f2f5fa;
+  border-color: #d3dbe7;
+  box-shadow: none;
+}
+
+.sidebarSkillCard p {
+  font-size: 16px;
 }
 
 .skillBadge {

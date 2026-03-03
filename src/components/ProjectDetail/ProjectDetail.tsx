@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../api/supabase'
@@ -88,6 +88,14 @@ const ProjectDetail = () => {
             }))
     }, [project])
 
+    const [selectedSkillName, setSelectedSkillName] = useState('')
+
+    const effectiveSelectedSkillName = skillCards.some((skill) => skill.name === selectedSkillName)
+        ? selectedSkillName
+        : (skillCards[0]?.name ?? '')
+
+    const selectedSkill = skillCards.find((skill) => skill.name === effectiveSelectedSkillName)
+
     if (isLoading) return <p className={styles.status}>프로젝트를 불러오는 중...</p>
     if (error || !project) return <p className={styles.status}>프로젝트 정보를 찾을 수 없습니다.</p>
 
@@ -133,32 +141,35 @@ const ProjectDetail = () => {
                             <h2>Tech Stack</h2>
                             <div className={styles.skills}>
                                 {skillCards.map((skill) => (
-                                    <span key={skill.name} className={styles.skillTag}>
+                                    <button
+                                        type="button"
+                                        key={skill.name}
+                                        className={`${styles.skillTag} ${selectedSkill?.name === skill.name ? styles.skillTagActive : ''}`}
+                                        onClick={() => setSelectedSkillName(skill.name)}
+                                    >
                                         {skill.name}
-                                    </span>
+                                    </button>
                                 ))}
                             </div>
                         </div>
+
+                        {selectedSkill && (
+                            <article key={`${selectedSkill.name}-card`} className={`${styles.skillCard} ${styles.sidebarSkillCard}`}>
+                                <span className={styles.skillBadge}>{selectedSkill.name}</span>
+                                <p>{selectedSkill.reason}</p>
+                            </article>
+                        )}
                     </aside>
 
                     {/* 내용 부분 = A파트 + B파트 */}
                     <main className={styles.main}>
 
 
-                        {/* A파트 : 프로젝트 기본 정보 + 기술 사용 이유*/}
+                        {/* A파트 : 프로젝트 기본 정보 */}
                         <header className={styles.contentHeader}>
                             <h1 className={styles.projectTitle}>{project.title}</h1>
                             <p className={styles.projectSubtitle}>{overview}</p>
                         </header>
-
-                        <div className={styles.skillCards}>
-                            {skillCards.map((skill) => (
-                                <article key={`${skill.name}-card`} className={styles.skillCard}>
-                                    <span className={styles.skillBadge}>{skill.name}</span>
-                                    <p>{skill.reason}</p>
-                                </article>
-                            ))}
-                        </div>
 
                         {/* B파트 : Markdown 상세 내용 */}
                         {markdown && (
