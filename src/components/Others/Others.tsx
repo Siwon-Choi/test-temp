@@ -18,7 +18,11 @@ import {
 const solvedAcHandle = getSolvedAcHandle()
 
 const Others = () => {
-  const { data: solvedAc, isLoading: solvedLoading } = useQuery<SolvedAcUser>({
+  const {
+    data: solvedAc,
+    isLoading: solvedLoading,
+    isError: solvedError,
+  } = useQuery<SolvedAcUser>({
     queryKey: ['solvedac', solvedAcHandle],
     queryFn: () => getSolvedAcUser(solvedAcHandle),
     enabled: Boolean(solvedAcHandle),
@@ -37,7 +41,10 @@ const Others = () => {
 
   const projectStats = useMemo(() => calculateProjectStats(projectCategories), [projectCategories])
 
-  const tierText = solvedAc ? getSolvedAcTierText(solvedAc.tier) : '데이터 확인 중'
+  const solvedCountText = solvedLoading ? '불러오는 중...' : solvedAc?.solvedCount ?? '-'
+  const tierText = solvedLoading ? '불러오는 중...' : solvedAc ? getSolvedAcTierText(solvedAc.tier) : '-'
+  const maxStreakText = solvedLoading ? '불러오는 중...' : solvedAc?.maxStreak ? `${solvedAc.maxStreak}일` : '-'
+  const arenaRatingText = solvedLoading ? '불러오는 중...' : solvedAc?.arenaRating ?? '-'
 
   return (
     <section className={styles.others}>
@@ -47,13 +54,21 @@ const Others = () => {
         <article className={styles.card}>
           <h3 className={styles.cardTitle}>📌 백준 / solved.ac 지표</h3>
           {solvedAcHandle ? (
-            <ul className={styles.list}>
-              <li>핸들: <strong>{solvedAcHandle}</strong></li>
-              <li>푼 문제 수: <strong>{solvedLoading ? '불러오는 중...' : solvedAc?.solvedCount ?? '-'}</strong></li>
-              <li>현재 티어: <strong>{tierText}</strong></li>
-              <li>최대 연속 풀이: <strong>{solvedLoading ? '-' : `${solvedAc?.maxStreak ?? 0}일`}</strong></li>
-              <li>arena rating: <strong>{solvedLoading ? '-' : solvedAc?.arenaRating ?? '-'}</strong></li>
-            </ul>
+            <>
+              <ul className={styles.list}>
+                <li>핸들: <strong>{solvedAcHandle}</strong></li>
+                <li>푼 문제 수: <strong>{solvedCountText}</strong></li>
+                <li>현재 티어: <strong>{tierText}</strong></li>
+                <li>최대 연속 풀이: <strong>{maxStreakText}</strong></li>
+                <li>arena rating: <strong>{arenaRatingText}</strong></li>
+              </ul>
+              {solvedError && (
+                <p className={styles.helper}>
+                  solved.ac 조회에 실패했습니다. 브라우저에서 외부 API 요청이 차단된 환경일 수 있어요.
+                  필요하면 서버 API(프록시)로 우회해 안정적으로 가져오세요.
+                </p>
+              )}
+            </>
           ) : (
             <p className={styles.helper}>`VITE_SOLVEDAC_HANDLE` 환경변수를 설정하면 계정 지표가 표시됩니다.</p>
           )}
