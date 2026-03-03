@@ -83,10 +83,49 @@
 }
 
 .card {
+    position: relative;
     background: #2b4167;
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.cardControls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+    z-index: 2;
+}
+
+.controlButton {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 900;
+    font-size: 18px;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.controlButton img {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
+.editControlButton {
+    background: #f6c65f;
+}
+
+.deleteControlButton {
+    background: #eb5a63;
 }
 
 .addCard {

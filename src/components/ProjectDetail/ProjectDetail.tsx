@@ -122,7 +122,7 @@ const ProjectDetail = () => {
                         <button
                             type="button"
                             className={styles.backButton}
-                            onClick={() => navigate(-1)}
+                            onClick={() => navigate('/#projects')}
                         >
                             뒤로가기
                         </button>

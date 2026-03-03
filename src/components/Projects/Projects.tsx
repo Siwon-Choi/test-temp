@@ -4,9 +4,10 @@ import monitorIcon from '../../assets/icons/monitor.svg'
 import githubIcon from '../../assets/icons/github.png'
 import prevIcon from '../../assets/icons/prev.svg'
 import nextIcon from '../../assets/icons/next.svg'
+import editIcon from '../../assets/icons/edit.svg'
 import { supabase } from '../../api/supabase'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { isAuthenticated } from '../../utils/authStorage'
 
 
@@ -69,6 +70,7 @@ const getCategoryTone = (category: string | null) => {
 
 
 const Projects = () => {
+    const navigate = useNavigate()
     const [canAddProject, setCanAddProject] = useState(() => isAuthenticated())
 
     useEffect(() => {
@@ -338,7 +340,7 @@ const Projects = () => {
                                 <div key={pIndex} className={styles.slide}>
                                     <div className={styles.cards}>
                                         {canAddProject ? (
-                                            <button type="button" className={styles.addCard} aria-label="프로젝트 추가">
+                                            <button type="button" className={styles.addCard} aria-label="프로젝트 추가" onClick={() => navigate('/projects/new')}>
                                                 <span className={styles.addPlus}>+</span>
                                             </button>
                                         ) : null}
@@ -348,6 +350,22 @@ const Projects = () => {
                                             const categoryTone = getCategoryTone(category)
 
                                             return <div key={`${pIndex}-${project.project_id}-${i}`} className={styles.card}>
+
+                                                {canAddProject ? (
+                                                    <div className={styles.cardControls}>
+                                                        <button
+                                                            type="button"
+                                                            className={`${styles.controlButton} ${styles.editControlButton}`}
+                                                            aria-label={`${project.title} 수정`}
+                                                            onClick={() => navigate(`/projects/${project.slug}/edit`)}
+                                                        >
+                                                            <img src={editIcon} alt="" />
+                                                        </button>
+                                                        <button type="button" className={`${styles.controlButton} ${styles.deleteControlButton}`} aria-label={`${project.title} 삭제`}>
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ) : null}
 
                                                 {/* 이미지 */}
                                                 <div
