@@ -151,10 +151,10 @@ const ProjectDetailInput = () => {
 
                 if (existingSkillError) throw existingSkillError
 
-                ;(existingSkillRows ?? []).forEach((row) => {
-                    const typedRow = row as { skill_id: number; name: string }
-                    skillIdsByName.set(typedRow.name.toLowerCase(), typedRow.skill_id)
-                })
+                    ; (existingSkillRows ?? []).forEach((row) => {
+                        const typedRow = row as { skill_id: number; name: string }
+                        skillIdsByName.set(typedRow.name.toLowerCase(), typedRow.skill_id)
+                    })
             }
 
             const newSkills = skills.filter((skill) => skill.isNew)
@@ -172,10 +172,10 @@ const ProjectDetailInput = () => {
 
                 if (insertSkillError) throw insertSkillError
 
-                ;(insertedSkillRows ?? []).forEach((row) => {
-                    const typedRow = row as { skill_id: number; name: string }
-                    skillIdsByName.set(typedRow.name.toLowerCase(), typedRow.skill_id)
-                })
+                    ; (insertedSkillRows ?? []).forEach((row) => {
+                        const typedRow = row as { skill_id: number; name: string }
+                        skillIdsByName.set(typedRow.name.toLowerCase(), typedRow.skill_id)
+                    })
             }
 
             const projectSkillsToInsert = skills
@@ -228,7 +228,7 @@ const ProjectDetailInput = () => {
             <section className={styles.page}>
                 <div className={styles.shell}>
                     <aside className={styles.sidebar}>
-                        <button type="button" className={styles.backButton} onClick={() => navigate(-1)}>
+                        <button type="button" className={styles.backButton} onClick={() => navigate('/#projects')}>
                             뒤로가기
                         </button>
 
