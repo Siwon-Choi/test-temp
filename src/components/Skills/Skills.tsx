@@ -4,6 +4,8 @@ import BackendIcon from "../../assets/icons/backend.png";
 import DevOpsIcon from "../../assets/icons/devops.png";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../api/supabase";
+import { useEffect, useState } from "react";
+import { isAuthenticated } from "../../utils/authStorage";
 
 // 데이터
 type SkillRowDB = {
@@ -16,6 +18,8 @@ type SkillRowUI = {
     category: string;
     items: string[];
 };
+
+type EditMode = "delete" | "edit" | "add" | null;
 
 // 카테고리에 아이콘 매핑
 const CATEGORY_ICONS: Record<string, string> = {
@@ -81,6 +85,30 @@ const groupByCategory = (rows: SkillRowDB[]): SkillRowUI[] => {
 
 
 const Skills = () => {
+    const [loggedIn, setLoggedIn] = useState(() => isAuthenticated());
+    const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
+    const [editMode, setEditMode] = useState<EditMode>(null);
+
+    useEffect(() => {
+        const syncAuthState = () => {
+            const auth = isAuthenticated();
+            setLoggedIn(auth);
+
+            if (!auth) {
+                setIsEditMenuOpen(false);
+                setEditMode(null);
+            }
+        };
+
+        window.addEventListener("auth-changed", syncAuthState);
+        window.addEventListener("storage", syncAuthState);
+
+        return () => {
+            window.removeEventListener("auth-changed", syncAuthState);
+            window.removeEventListener("storage", syncAuthState);
+        };
+    }, []);
+
     const { data, isLoading, error } = useQuery<SkillRowUI[]>({
         queryKey: ["skill"],
         queryFn: async () => {
@@ -106,6 +134,53 @@ const Skills = () => {
                 <h2 className={styles.title}>SKILLS</h2>
 
                 <div className={styles.card}>
+                    {loggedIn ? (
+                        <div className={styles.editorControls}>
+                            <button
+                                type="button"
+                                className={styles.editToggleButton}
+                                onClick={() => setIsEditMenuOpen((prev) => !prev)}
+                            >
+                                편집
+                            </button>
+
+                            {isEditMenuOpen ? (
+                                <div className={styles.editMenu}>
+                                    <button
+                                        type="button"
+                                        className={`${styles.editMenuItem} ${editMode === "delete" ? styles.activeMenuItem : ""}`}
+                                        onClick={() => {
+                                            setEditMode("delete");
+                                            setIsEditMenuOpen(false);
+                                        }}
+                                    >
+                                        삭제
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${styles.editMenuItem} ${editMode === "edit" ? styles.activeMenuItem : ""}`}
+                                        onClick={() => {
+                                            setEditMode("edit");
+                                            setIsEditMenuOpen(false);
+                                        }}
+                                    >
+                                        수정
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${styles.editMenuItem} ${editMode === "add" ? styles.activeMenuItem : ""}`}
+                                        onClick={() => {
+                                            setEditMode("add");
+                                            setIsEditMenuOpen(false);
+                                        }}
+                                    >
+                                        추가
+                                    </button>
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : null}
+
                     {rows.map((row) => {
                         const iconSrc = CATEGORY_ICONS[row.category] ?? LanguageIcon;
 
@@ -124,14 +199,31 @@ const Skills = () => {
 
                                 <div className={styles.chips}>
                                     {row.items.map((item) => (
-                                        <span
-                                            key={`${row.category}-${item}`}
-                                            className={styles.chip}
-                                            style={{ backgroundColor: getColorFromText(item) }}
-                                        >
-                                            {item}
-                                        </span>
+                                        <div key={`${row.category}-${item}`} className={styles.skillItem}>
+                                            <span
+                                                className={styles.chip}
+                                                style={{ backgroundColor: getColorFromText(item) }}
+                                            >
+                                                {item}
+                                            </span>
+
+                                            {loggedIn && editMode === "delete" ? (
+                                                <button type="button" className={`${styles.modeBadge} ${styles.deleteBadge}`}>
+                                                    ×
+                                                </button>
+                                            ) : null}
+
+                                            {loggedIn && editMode === "edit" ? (
+                                                <span className={`${styles.modeBadge} ${styles.editBadge}`}>o</span>
+                                            ) : null}
+                                        </div>
                                     ))}
+
+                                    {loggedIn && editMode === "add" ? (
+                                        <button type="button" className={`${styles.modeBadge} ${styles.addBadge}`}>
+                                            +
+                                        </button>
+                                    ) : null}
                                 </div>
                             </div>
                         );
