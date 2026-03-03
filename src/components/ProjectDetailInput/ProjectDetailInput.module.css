@@ -196,10 +196,18 @@
   color: #172033;
 }
 
-.markdownSection h3 {
-  margin: 0 0 12px;
+
+
+.previewSection {
+  display: grid;
+  gap: 10px;
+}
+
+.previewHeading {
+  margin: 0;
   font-size: 24px;
   color: #1d2740;
+  text-align: center;
 }
 
 .markdownBody {
@@ -246,7 +254,7 @@
 }
 
 .submitButton {
-  justify-self: end;
+  justify-self: center;
   border: 0;
   border-radius: 999px;
   background: #1f5fff;
