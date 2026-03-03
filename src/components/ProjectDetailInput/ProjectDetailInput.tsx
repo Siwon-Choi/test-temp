@@ -196,13 +196,15 @@ const ProjectDetailInput = () => {
                             />
                         </section>
 
-                        <section className={styles.markdownSection}>
-                            <h3>Preview</h3>
-                            <h1 className={styles.projectTitle}>{resolvedTitle}</h1>
-                            <p className={styles.projectSubtitle}>{resolvedSubtitle}</p>
-                            <p className={styles.previewMeta}>Project Category: {projectCategory}</p>
-                            <div className={styles.markdownBody}>
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                        <section className={styles.previewSection}>
+                            <h3 className={styles.previewHeading}>Preview</h3>
+                            <div className={styles.markdownSection}>
+                                <h1 className={styles.projectTitle}>{resolvedTitle}</h1>
+                                <p className={styles.projectSubtitle}>{resolvedSubtitle}</p>
+                                <p className={styles.previewMeta}>Project Category: {projectCategory}</p>
+                                <div className={styles.markdownBody}>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                                </div>
                             </div>
                         </section>
 
