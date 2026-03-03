@@ -2,7 +2,7 @@ import styles from "./Skills.module.css";
 import LanguageIcon from "../../assets/icons/language.png";
 import BackendIcon from "../../assets/icons/backend.png";
 import DevOpsIcon from "../../assets/icons/devops.png";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../api/supabase";
 import { useEffect, useState } from "react";
 import { isAuthenticated } from "../../utils/authStorage";
@@ -89,6 +89,7 @@ const Skills = () => {
     const [loggedIn, setLoggedIn] = useState(() => isAuthenticated());
     const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
     const [editMode, setEditMode] = useState<EditMode>(null);
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         const syncAuthState = () => {
@@ -123,6 +124,37 @@ const Skills = () => {
             return groupByCategory((data ?? []) as SkillRowDB[]);
         },
     });
+
+    const addSkillMutation = useMutation({
+        mutationFn: async ({ name, category }: { name: string; category: string }) => {
+            const { error } = await supabase.from("skill").insert({ name, category });
+
+            if (error) throw error;
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["skill"] });
+        },
+    });
+
+    const handleAddSkill = async (category: string) => {
+        const value = window.prompt(`${category} 카테고리에 추가할 기술명을 입력하세요.`);
+
+        if (value === null) return;
+
+        const name = value.trim();
+
+        if (!name) {
+            window.alert("기술명을 입력해주세요.");
+            return;
+        }
+
+        try {
+            await addSkillMutation.mutateAsync({ name, category });
+            window.alert("기술이 추가되었습니다.");
+        } catch {
+            window.alert("기술 추가에 실패했습니다.");
+        }
+    };
 
     if (isLoading) return <section className={styles.section}>로딩 중...</section>;
     if (error) return <section className={styles.section}>에러가 발생했습니다.</section>;
@@ -223,7 +255,14 @@ const Skills = () => {
                                     ))}
 
                                     {loggedIn && editMode === "add" ? (
-                                        <button type="button" className={`${styles.modeBadge} ${styles.addBadge}`}>
+                                        <button
+                                            type="button"
+                                            className={`${styles.modeBadge} ${styles.addBadge}`}
+                                            onClick={() => {
+                                                void handleAddSkill(row.category);
+                                            }}
+                                            disabled={addSkillMutation.isPending}
+                                        >
                                             +
                                         </button>
                                     ) : null}
