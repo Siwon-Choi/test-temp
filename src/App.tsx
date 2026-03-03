@@ -8,6 +8,7 @@ import Projects from './components/Projects/Projects'
 import Skills from './components/Skills/Skills'
 import ProjectDetail from './components/ProjectDetail/ProjectDetail'
 import LoginHoldButton from './components/LoginHoldButton/LoginHoldButton'
+import ProjectDetailInput from './components/ProjectDetailInput/ProjectDetailInput'
 
 function MainPage() {
   return (
@@ -29,6 +30,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<MainPage />} />
+      <Route path="/projects/new" element={<ProjectDetailInput />} />
       <Route path="/projects/:slug" element={<ProjectDetail />} />
     </Routes>
   )
