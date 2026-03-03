@@ -153,6 +153,26 @@ const Skills = () => {
         },
     });
 
+    const deleteSkillMutation = useMutation({
+        mutationFn: async ({ skill_id, deleteFromProjects }: { skill_id: number; deleteFromProjects: boolean }) => {
+            if (deleteFromProjects) {
+                const { error: projectSkillError } = await supabase
+                    .from("projectskill")
+                    .delete()
+                    .eq("skill_id", skill_id);
+
+                if (projectSkillError) throw projectSkillError;
+            }
+
+            const { error } = await supabase.from("skill").delete().eq("skill_id", skill_id);
+
+            if (error) throw error;
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["skill"] });
+        },
+    });
+
     const handleAddSkill = async (category: string) => {
         const value = window.prompt(`${category} 카테고리에 추가할 기술명을 입력하세요.`);
 
@@ -192,6 +212,30 @@ const Skills = () => {
             window.alert("기술이 수정되었습니다.");
         } catch {
             window.alert("기술 수정에 실패했습니다.");
+        }
+    };
+
+    const handleDeleteSkill = async (skillId: number, currentName: string) => {
+        const shouldDelete = window.confirm(`${currentName} 기술을 삭제하시겠습니까?`);
+
+        if (!shouldDelete) return;
+
+        try {
+            await deleteSkillMutation.mutateAsync({ skill_id: skillId, deleteFromProjects: false });
+            window.alert("기술이 삭제되었습니다.");
+        } catch {
+            const shouldDeleteRelated = window.confirm(
+                "프로젝트에서 사용 중인 기술입니다. 프로젝트 기술 연결도 함께 삭제할까요?",
+            );
+
+            if (!shouldDeleteRelated) return;
+
+            try {
+                await deleteSkillMutation.mutateAsync({ skill_id: skillId, deleteFromProjects: true });
+                window.alert("기술 및 연관 프로젝트 기술이 삭제되었습니다.");
+            } catch {
+                window.alert("기술 삭제에 실패했습니다.");
+            }
         }
     };
 
@@ -280,7 +324,14 @@ const Skills = () => {
                                             </span>
 
                                             {loggedIn && editMode === "delete" ? (
-                                                <button type="button" className={`${styles.modeBadge} ${styles.deleteBadge}`}>
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.modeBadge} ${styles.deleteBadge}`}
+                                                    onClick={() => {
+                                                        void handleDeleteSkill(item.skill_id, item.name);
+                                                    }}
+                                                    disabled={deleteSkillMutation.isPending}
+                                                >
                                                     ×
                                                 </button>
                                             ) : null}
