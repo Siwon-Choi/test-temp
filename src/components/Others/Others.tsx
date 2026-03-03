@@ -1,94 +1,43 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import styles from './Others.module.css'
-import { supabase } from '../../api/supabase'
+import {
+  calculateProjectStats,
+  getProjectCategories,
+  getSkillRows,
+  type ProjectCategoryRow,
+  type SkillCountRow,
+} from '../../api/portfolio'
+import {
+  getSolvedAcHandle,
+  getSolvedAcTierText,
+  getSolvedAcUser,
+  type SolvedAcUser,
+} from '../../api/solvedac'
 
-type SolvedAcUser = {
-  solvedCount: number
-  tier: number
-  maxStreak: number
-  arenaRating: number
-}
-
-type ProjectCategoryRow = {
-  category: string | null
-}
-
-type SkillCountRow = {
-  skill_id: number
-}
-
-const allTier = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Ruby']
-const allSubtier = ['V', 'IV', 'III', 'II', 'I']
-
-const solvedAcHandle = import.meta.env.VITE_SOLVEDAC_HANDLE?.trim()
-
-const getTierText = (idx: number) => {
-  if (!idx || idx < 1) return 'Unrated'
-
-  const tier = Number.isInteger(idx / 5) ? Math.floor(idx / 5) - 1 : Math.floor(idx / 5)
-  const safeTier = Math.min(Math.max(tier, 0), allTier.length - 1)
-
-  let subtier = 0
-  if (idx % 5 === 1) subtier = 0
-  else if (idx % 5 === 0) subtier = 4
-  else subtier = (idx % 5) - 1
-
-  return `${allTier[safeTier]} ${allSubtier[subtier]}`
-}
-
-const normalizeCategory = (category: string | null) => category?.trim().toLowerCase() ?? ''
+const solvedAcHandle = getSolvedAcHandle()
 
 const Others = () => {
   const { data: solvedAc, isLoading: solvedLoading } = useQuery<SolvedAcUser>({
     queryKey: ['solvedac', solvedAcHandle],
-    queryFn: async () => {
-      const response = await fetch(`https://solved.ac/api/v3/user/show?handle=${solvedAcHandle}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch solved.ac profile')
-      }
-      return response.json() as Promise<SolvedAcUser>
-    },
+    queryFn: () => getSolvedAcUser(solvedAcHandle),
     enabled: Boolean(solvedAcHandle),
     staleTime: 1000 * 60 * 10,
   })
 
   const { data: projectCategories = [] } = useQuery<ProjectCategoryRow[]>({
     queryKey: ['project-category-counts'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('project').select('category')
-      if (error) throw error
-      return (data ?? []) as ProjectCategoryRow[]
-    },
+    queryFn: getProjectCategories,
   })
 
   const { data: skillRows = [] } = useQuery<SkillCountRow[]>({
     queryKey: ['skill-count'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('skill').select('skill_id')
-      if (error) throw error
-      return (data ?? []) as SkillCountRow[]
-    },
+    queryFn: getSkillRows,
   })
 
-  const projectStats = useMemo(() => {
-    return projectCategories.reduce(
-      (acc, row) => {
-        const category = normalizeCategory(row.category)
+  const projectStats = useMemo(() => calculateProjectStats(projectCategories), [projectCategories])
 
-        acc.total += 1
-        if (category.includes('front')) acc.frontend += 1
-        else if (category.includes('back')) acc.backend += 1
-        else if (category.includes('mobile')) acc.mobile += 1
-        else acc.other += 1
-
-        return acc
-      },
-      { total: 0, frontend: 0, backend: 0, mobile: 0, other: 0 },
-    )
-  }, [projectCategories])
-
-  const tierText = solvedAc ? getTierText(solvedAc.tier) : '데이터 확인 중'
+  const tierText = solvedAc ? getSolvedAcTierText(solvedAc.tier) : '데이터 확인 중'
 
   return (
     <section className={styles.others}>
