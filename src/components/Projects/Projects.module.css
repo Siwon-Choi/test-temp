@@ -89,6 +89,36 @@
     border: 1px solid rgba(255, 255, 255, 0.10);
 }
 
+.addCard {
+    min-height: 374px;
+    border-radius: 16px;
+    border: 2px dashed rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.addPlus {
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.addCard:hover {
+    border-color: #f0916b;
+    background: rgba(240, 145, 107, 0.08);
+}
+
 .image {
     height: 200px;
     background: #d8d9de;
