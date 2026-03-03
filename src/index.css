@@ -48,4 +48,10 @@ table {
 
 body {
   padding-top: var(--header-h);
+  overflow-x: hidden;
+}
+@media (max-width: 640px) {
+  :root {
+    --header-h: 64px;
+  }
 }
