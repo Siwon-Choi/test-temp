@@ -354,3 +354,44 @@
     background: #f0916b;
     border-color: #f0916b;
 }
+
+@media (max-width: 900px) {
+    .projects {
+        padding: 52px 16px 72px;
+    }
+
+    .menu {
+        flex-wrap: wrap;
+    }
+
+    .carousel {
+        gap: 10px;
+    }
+
+    .cards {
+        padding: 0 6px;
+        gap: 12px;
+    }
+
+    .arrow,
+    .arrowSpacer {
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .title {
+        font-size: 32px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+        padding: 0;
+    }
+
+    .buttons {
+        grid-template-columns: 1fr;
+    }
+}
