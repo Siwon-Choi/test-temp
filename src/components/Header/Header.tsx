@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 import styles from "./Header.module.css";
 
 const Header = () => {
@@ -15,6 +15,15 @@ const Header = () => {
     ) => {
         e.preventDefault();
 
+        if (location.pathname === "/") {
+            document
+                .getElementById(sectionId)
+                ?.scrollIntoView({ behavior: "smooth" });
+
+            navigate(`/#${sectionId}`, { replace: true });
+            return;
+        }
+
         navigate(`/#${sectionId}`);
     };
 
@@ -23,7 +32,11 @@ const Header = () => {
             <div
                 className={styles.logo}
                 onClick={() => {
-                    navigate("/#home");
+                    if (location.pathname === "/") {
+                        document.getElementById("home")?.scrollIntoView({ behavior: "smooth" });
+                    } else {
+                        navigate("/#home");
+                    }
                 }}
                 role="button"
                 tabIndex={0}

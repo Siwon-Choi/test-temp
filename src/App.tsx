@@ -1,29 +1,14 @@
-import { useEffect } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes } from 'react-router'
 import styles from './App.module.css'
 import Footer from './components/Footer/Footer'
 import Header from './components/Header/Header'
 import Home from './components/Home/Home'
 import Others from './components/Others/Others'
-import ProjectDetail from './components/ProjectDetail/ProjectDetail'
 import Projects from './components/Projects/Projects'
 import Skills from './components/Skills/Skills'
+import ProjectDetail from './components/ProjectDetail/ProjectDetail'
 
 function MainPage() {
-  const location = useLocation()
-
-  useEffect(() => {
-    const sectionId = location.hash.replace('#', '')
-
-    if (!sectionId) {
-      return
-    }
-
-    requestAnimationFrame(() => {
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' })
-    })
-  }, [location.hash])
-
   return (
     <div className={styles.app}>
       <Header />
@@ -46,5 +31,4 @@ function App() {
     </Routes>
   )
 }
-
 export default App

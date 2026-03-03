@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useMemo, useRef, useState } from 'react'
 import styles from './Projects.module.css'
 import monitorIcon from '../../assets/icons/monitor.svg'
@@ -7,6 +6,7 @@ import prevIcon from '../../assets/icons/prev.svg'
 import nextIcon from '../../assets/icons/next.svg'
 import { supabase } from '../../api/supabase'
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router'
 
 
 type SkillRow = {
@@ -370,7 +370,7 @@ const Projects = () => {
                                                     {/* 버튼 */}
                                                     <div className={styles.buttons}>
                                                         <Link to={`/projects/${project.slug}`} className={styles.button}>
-                                                            <img src={monitorIcon} alt="detail" />
+                                                            <img src={monitorIcon} alt="demo" />
                                                             상세 보기
                                                         </Link>
 
