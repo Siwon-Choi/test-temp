@@ -353,7 +353,12 @@ const Projects = () => {
 
                                                 {canAddProject ? (
                                                     <div className={styles.cardControls}>
-                                                        <button type="button" className={`${styles.controlButton} ${styles.editControlButton}`} aria-label={`${project.title} 수정`}>
+                                                        <button
+                                                            type="button"
+                                                            className={`${styles.controlButton} ${styles.editControlButton}`}
+                                                            aria-label={`${project.title} 수정`}
+                                                            onClick={() => navigate(`/projects/${project.slug}/edit`)}
+                                                        >
                                                             <img src={editIcon} alt="" />
                                                         </button>
                                                         <button type="button" className={`${styles.controlButton} ${styles.deleteControlButton}`} aria-label={`${project.title} 삭제`}>
