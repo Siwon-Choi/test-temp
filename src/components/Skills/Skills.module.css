@@ -183,3 +183,44 @@
   cursor: pointer;
 }
 
+
+@media (max-width: 768px) {
+  .section {
+    padding: 48px 16px 72px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .card {
+    padding: 22px 14px;
+  }
+
+  .row {
+    grid-template-columns: 44px 1fr;
+    align-items: flex-start;
+    gap: 10px 12px;
+    padding: 12px 4px;
+  }
+
+  .category {
+    grid-column: 2;
+    margin-top: 2px;
+  }
+
+  .chips {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+  }
+
+  .iconBox {
+    width: 38px;
+    height: 38px;
+  }
+
+  .iconImg {
+    width: 26px;
+    height: 26px;
+  }
+}
