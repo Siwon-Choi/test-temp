@@ -71,3 +71,20 @@ export default defineConfig([
   },
 ])
 ```
+
+
+## Solved.ac account setup
+
+1. Copy `.env.example` to `.env`.
+2. Set `VITE_SOLVEDAC_HANDLE` to your solved.ac/BOJ handle.
+
+```bash
+cp .env.example .env
+# edit .env
+```
+
+Example:
+
+```env
+VITE_SOLVEDAC_HANDLE=dipokal
+```
