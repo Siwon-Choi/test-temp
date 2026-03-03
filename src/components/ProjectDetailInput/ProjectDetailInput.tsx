@@ -20,7 +20,16 @@ type SkillRow = {
 }
 
 const SKILL_CATEGORY_ORDER = ['Language', 'Frontend', 'Backend', 'Mobile', 'DevOps', 'Database', 'Embedded']
-const PROJECT_CATEGORY_OPTIONS = ['frontend', 'backend', 'mobile', 'iot', 'devops', 'default']
+const PROJECT_CATEGORY_OPTIONS = ['Frontend', 'Backend', 'Mobile', 'Embedded']
+
+const slugify = (value: string) =>
+    value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9가-힣\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
 
 const ProjectDetailInput = () => {
     const navigate = useNavigate()
@@ -40,6 +49,7 @@ const ProjectDetailInput = () => {
     const [skillReasonDraft, setSkillReasonDraft] = useState('')
     const [skillCategoryDraft, setSkillCategoryDraft] = useState(SKILL_CATEGORY_ORDER[0])
     const [selectedSkillName, setSelectedSkillName] = useState('')
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const { data: existingSkillNames = [] } = useQuery<string[]>({
         queryKey: ['skill-name-list'],
@@ -85,14 +95,118 @@ const ProjectDetailInput = () => {
         setSkillCategoryDraft(SKILL_CATEGORY_ORDER[0])
     }
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         if (!title.trim()) {
             window.alert('TITLE을 입력해주세요.')
             return
         }
 
-        const newSkillCount = skills.filter((skill) => skill.isNew).length
-        window.alert(`프로젝트 추가 준비가 완료되었습니다.\n(연결 예정) 신규 스킬 ${newSkillCount}개는 Skill 컴포넌트에도 반영됩니다.`)
+        if (isSubmitting) return
+
+        setIsSubmitting(true)
+
+        try {
+            let baseSlug = slugify(title)
+            if (!baseSlug) baseSlug = `project-${Date.now()}`
+
+            const { count: duplicateSlugCount, error: duplicateSlugError } = await supabase
+                .from('project')
+                .select('project_id', { count: 'exact', head: true })
+                .like('slug', `${baseSlug}%`)
+
+            if (duplicateSlugError) throw duplicateSlugError
+
+            const nextSlug = duplicateSlugCount && duplicateSlugCount > 0
+                ? `${baseSlug}-${duplicateSlugCount + 1}`
+                : baseSlug
+
+            const { data: insertedProject, error: projectInsertError } = await supabase
+                .from('project')
+                .insert({
+                    slug: nextSlug,
+                    title: title.trim(),
+                    overview: subtitle.trim() || null,
+                    img_url: imageUrl.trim() || null,
+                    category: projectCategory,
+                    role: role.trim() || null,
+                    duration: duration.trim() || null,
+                    contribution: contribution.trim() || null,
+                    readme: content.trim() || null,
+                })
+                .select('project_id')
+                .single()
+
+            if (projectInsertError) throw projectInsertError
+
+            const projectId = insertedProject.project_id as number
+
+            const skillIdsByName = new Map<string, number>()
+            const existingNames = skills.filter((skill) => !skill.isNew).map((skill) => skill.name)
+
+            if (existingNames.length > 0) {
+                const { data: existingSkillRows, error: existingSkillError } = await supabase
+                    .from('skill')
+                    .select('skill_id,name')
+                    .in('name', existingNames)
+
+                if (existingSkillError) throw existingSkillError
+
+                ;(existingSkillRows ?? []).forEach((row) => {
+                    const typedRow = row as { skill_id: number; name: string }
+                    skillIdsByName.set(typedRow.name.toLowerCase(), typedRow.skill_id)
+                })
+            }
+
+            const newSkills = skills.filter((skill) => skill.isNew)
+
+            if (newSkills.length > 0) {
+                const { data: insertedSkillRows, error: insertSkillError } = await supabase
+                    .from('skill')
+                    .insert(
+                        newSkills.map((skill) => ({
+                            name: skill.name,
+                            category: skill.category,
+                        })),
+                    )
+                    .select('skill_id,name')
+
+                if (insertSkillError) throw insertSkillError
+
+                ;(insertedSkillRows ?? []).forEach((row) => {
+                    const typedRow = row as { skill_id: number; name: string }
+                    skillIdsByName.set(typedRow.name.toLowerCase(), typedRow.skill_id)
+                })
+            }
+
+            const projectSkillsToInsert = skills
+                .map((skill) => {
+                    const skillId = skillIdsByName.get(skill.name.toLowerCase())
+                    if (!skillId) return null
+
+                    return {
+                        project_id: projectId,
+                        skill_id: skillId,
+                        skill_reason: skill.reason || null,
+                    }
+                })
+                .filter((row): row is { project_id: number; skill_id: number; skill_reason: string | null } => Boolean(row))
+
+            if (projectSkillsToInsert.length > 0) {
+                const { error: projectSkillError } = await supabase
+                    .from('projectskill')
+                    .insert(projectSkillsToInsert)
+
+                if (projectSkillError) throw projectSkillError
+            }
+
+            window.alert('프로젝트가 추가되었습니다.')
+            navigate(`/projects/${nextSlug}`)
+        } catch (error) {
+            console.error(error)
+            window.alert('프로젝트 추가에 실패했습니다. 콘솔 로그를 확인해주세요.')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     const selectedSkill = useMemo(() => {
@@ -208,8 +322,8 @@ const ProjectDetailInput = () => {
                             </div>
                         </section>
 
-                        <button type="button" className={styles.submitButton} onClick={onSubmit}>
-                            최종 추가하기
+                        <button type="button" className={styles.submitButton} onClick={onSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? '추가 중...' : '최종 추가하기'}
                         </button>
                     </main>
                 </div>
