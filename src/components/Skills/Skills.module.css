@@ -21,12 +21,65 @@
 
 /* 카드 1개 */
 .card {
+  position: relative;
   width: 100%;
   background: #eaf6ff;
   border-radius: 16px;
   padding: 28px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.editorControls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 2;
+}
+
+.editToggleButton {
+  border: none;
+  border-radius: 10px;
+  background: #2f6df6;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.editMenu {
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  min-width: 88px;
+}
+
+.editMenuItem {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1c2c3a;
+  text-align: left;
+  cursor: pointer;
+}
+
+.editMenuItem + .editMenuItem {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.activeMenuItem {
+  background: #f0f5ff;
+  color: #1b57dc;
 }
 
 .row {
@@ -66,6 +119,12 @@
   gap: 10px;
 }
 
+.skillItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -84,4 +143,36 @@
   width: 32px;
   height: 32px;
   object-fit: contain;
+}
+
+.modeBadge {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.deleteBadge {
+  border: none;
+  background: #ff4d4f;
+  color: #fff;
+  cursor: pointer;
+}
+
+.editBadge {
+  background: #edf1f5;
+  color: #4f5a67;
+  border: 1px solid #cfd8e1;
+}
+
+.addBadge {
+  border: none;
+  background: #2f6df6;
+  color: #fff;
+  cursor: pointer;
 }
