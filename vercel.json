@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/solvedac/:path*",
+      "destination": "https://solved.ac/api/v3/:path*"
+    }
+  ]
+}

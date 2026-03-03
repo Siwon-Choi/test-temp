@@ -11,10 +11,19 @@ const allSubtier = ['V', 'IV', 'III', 'II', 'I']
 export const getSolvedAcHandle = () => import.meta.env.VITE_SOLVEDAC_HANDLE?.trim() ?? ''
 
 export const getSolvedAcUser = async (handle: string) => {
-  const response = await fetch(`https://solved.ac/api/v3/user/show?handle=${handle}`)
+  const query = new URLSearchParams({ handle }).toString()
+
+  const response = await fetch(`/api/solvedac/user/show?${query}`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'x-solvedac-language': 'ko',
+    },
+  })
 
   if (!response.ok) {
-    throw new Error('Failed to fetch solved.ac profile')
+    const errorText = await response.text()
+    throw new Error(`Failed to fetch solved.ac profile (${response.status}): ${errorText || response.statusText}`)
   }
 
   return response.json() as Promise<SolvedAcUser>

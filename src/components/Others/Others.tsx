@@ -22,7 +22,8 @@ const Others = () => {
     data: solvedAc,
     isLoading: solvedLoading,
     isError: solvedError,
-  } = useQuery<SolvedAcUser>({
+    error: solvedAcError,
+  } = useQuery<SolvedAcUser, Error>({
     queryKey: ['solvedac', solvedAcHandle],
     queryFn: () => getSolvedAcUser(solvedAcHandle),
     enabled: Boolean(solvedAcHandle),
@@ -64,8 +65,7 @@ const Others = () => {
               </ul>
               {solvedError && (
                 <p className={styles.helper}>
-                  solved.ac 조회에 실패했습니다. 브라우저에서 외부 API 요청이 차단된 환경일 수 있어요.
-                  필요하면 서버 API(프록시)로 우회해 안정적으로 가져오세요.
+                  solved.ac 조회 실패: {solvedAcError?.message ?? 'unknown error'}
                 </p>
               )}
             </>
