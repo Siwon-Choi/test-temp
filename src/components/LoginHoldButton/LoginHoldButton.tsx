@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import styles from './LoginHoldButton.module.css'
 
 const HOLD_DURATION = 3000
+const PROGRESS_VISIBLE_DELAY = 300
 
 function LoginHoldButton() {
   const [progress, setProgress] = useState(0)
@@ -10,6 +11,7 @@ function LoginHoldButton() {
 
   const holdStartTimeRef = useRef<number | null>(null)
   const rafRef = useRef<number | null>(null)
+  const loginTriggeredRef = useRef(false)
 
   const resetHoldingState = () => {
     if (rafRef.current !== null) {
@@ -28,14 +30,17 @@ function LoginHoldButton() {
     }
 
     const elapsed = timestamp - holdStartTimeRef.current
-    const nextProgress = Math.min(elapsed / HOLD_DURATION, 1)
+    const effectiveElapsed = Math.max(elapsed - PROGRESS_VISIBLE_DELAY, 0)
+    const progressDuration = HOLD_DURATION - PROGRESS_VISIBLE_DELAY
+    const nextProgress = Math.min(effectiveElapsed / progressDuration, 1)
     setProgress(nextProgress)
 
-    if (nextProgress >= 1) {
+    if (elapsed >= HOLD_DURATION) {
       setIsHolding(false)
       setIsLoginPopupOpen(true)
       holdStartTimeRef.current = null
       rafRef.current = null
+      loginTriggeredRef.current = true
       return
     }
 
@@ -47,6 +52,7 @@ function LoginHoldButton() {
       return
     }
 
+    loginTriggeredRef.current = false
     setIsHolding(true)
     setProgress(0)
     holdStartTimeRef.current = null
@@ -59,6 +65,15 @@ function LoginHoldButton() {
     }
 
     resetHoldingState()
+  }
+
+  const handleClick = () => {
+    if (loginTriggeredRef.current) {
+      loginTriggeredRef.current = false
+      return
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const progressAngle = `${progress * 360}deg`
@@ -74,7 +89,8 @@ function LoginHoldButton() {
         onTouchStart={startHold}
         onTouchEnd={stopHold}
         onTouchCancel={stopHold}
-        aria-label="3초 길게 눌러 로그인 팝업 열기"
+        onClick={handleClick}
+        aria-label="맨 위로 이동"
       >
         <span
           className={styles.progressLayer}
@@ -82,7 +98,7 @@ function LoginHoldButton() {
             backgroundImage: `conic-gradient(var(--progress-color) ${progressAngle}, transparent 0deg)`,
           }}
         />
-        <span className={styles.buttonInner}>로그인</span>
+        <span className={styles.buttonInner} aria-hidden="true">↑</span>
       </button>
 
       {isLoginPopupOpen ? (
