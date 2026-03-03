@@ -24,3 +24,18 @@
   padding: 24px;
   background: #fafcff;
 }
+
+@media (max-width: 768px) {
+  .others {
+    padding: 28px 16px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+}
