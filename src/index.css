@@ -49,3 +49,12 @@ table {
 body {
   padding-top: var(--header-h);
 }
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
