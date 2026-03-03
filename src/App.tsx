@@ -7,6 +7,7 @@ import Others from './components/Others/Others'
 import Projects from './components/Projects/Projects'
 import Skills from './components/Skills/Skills'
 import ProjectDetail from './components/ProjectDetail/ProjectDetail'
+import LoginHoldButton from './components/LoginHoldButton/LoginHoldButton'
 
 function MainPage() {
   return (
@@ -19,6 +20,7 @@ function MainPage() {
         <section id="others"><Others /></section>
       </main>
       <Footer />
+      <LoginHoldButton />
     </div>
   )
 }
