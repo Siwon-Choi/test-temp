@@ -1,14 +1,18 @@
 import { useRef, useState } from 'react'
-import styles from './LoginHoldButton.module.css'
-import vectorIcon from '../../assets/icons/vector.svg'
 import { supabase } from '../../api/supabase'
-const HOLD_DURATION = 2000
+import vectorIcon from '../../assets/icons/vector.svg'
+import { clearAuthSession, isAuthenticated, setAuthSession } from '../../utils/authStorage'
+import styles from './LoginHoldButton.module.css'
+
+const HOLD_DURATION = 3000
 const PROGRESS_VISIBLE_DELAY = 300
+
+type ModalType = 'login' | 'logout' | null
 
 function LoginHoldButton() {
   const [progress, setProgress] = useState(0)
   const [isHolding, setIsHolding] = useState(false)
-  const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false)
+  const [modalType, setModalType] = useState<ModalType>(null)
 
   const [loginId, setLoginId] = useState('')
   const [loginPw, setLoginPw] = useState('')
@@ -16,7 +20,7 @@ function LoginHoldButton() {
 
   const holdStartTimeRef = useRef<number | null>(null)
   const rafRef = useRef<number | null>(null)
-  const loginTriggeredRef = useRef(false)
+  const actionTriggeredRef = useRef(false)
 
   const resetHoldingState = () => {
     if (rafRef.current !== null) {
@@ -39,10 +43,10 @@ function LoginHoldButton() {
 
     if (elapsed >= HOLD_DURATION) {
       setIsHolding(false)
-      setIsLoginPopupOpen(true)
+      setModalType(isAuthenticated() ? 'logout' : 'login')
       holdStartTimeRef.current = null
       rafRef.current = null
-      loginTriggeredRef.current = true
+      actionTriggeredRef.current = true
       return
     }
 
@@ -50,9 +54,9 @@ function LoginHoldButton() {
   }
 
   const startHold = () => {
-    if (isLoginPopupOpen || isHolding) return
+    if (modalType || isHolding) return
 
-    loginTriggeredRef.current = false
+    actionTriggeredRef.current = false
     setIsHolding(true)
     setProgress(0)
     holdStartTimeRef.current = null
@@ -65,11 +69,22 @@ function LoginHoldButton() {
   }
 
   const handleClick = () => {
-    if (loginTriggeredRef.current) {
-      loginTriggeredRef.current = false
+    if (actionTriggeredRef.current) {
+      actionTriggeredRef.current = false
       return
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const closeModal = () => {
+    setModalType(null)
+  }
+
+  const handleLogout = () => {
+    clearAuthSession()
+    closeModal()
+    window.dispatchEvent(new Event('auth-changed'))
+    alert('로그아웃 되었습니다.')
   }
 
   const handleLogin = async () => {
@@ -96,10 +111,13 @@ function LoginHoldButton() {
       if (error) throw error
 
       if (data?.id) {
+        setAuthSession({
+          userId: data.id,
+          authenticatedAt: new Date().toISOString(),
+        })
+        closeModal()
+        window.dispatchEvent(new Event('auth-changed'))
         alert('로그인 성공')
-        setIsLoginPopupOpen(false)
-        // 필요하면 "로그인 여부"만 저장
-        localStorage.setItem('isLoggedIn', 'true')
       } else {
         alert('로그인 실패')
       }
@@ -138,7 +156,7 @@ function LoginHoldButton() {
         </span>
       </button>
 
-      {isLoginPopupOpen ? (
+      {modalType === 'login' ? (
         <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="로그인 팝업">
           <div className={styles.modalCard}>
             <h2>로그인</h2>
@@ -175,11 +193,29 @@ function LoginHoldButton() {
             <button
               type="button"
               className={styles.closeButton}
-              onClick={() => setIsLoginPopupOpen(false)}
+              onClick={closeModal}
               disabled={isLoggingIn}
             >
               닫기
             </button>
+          </div>
+        </div>
+      ) : null}
+
+      {modalType === 'logout' ? (
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="로그아웃 확인 팝업">
+          <div className={styles.modalCard}>
+            <h2>로그아웃</h2>
+            <p>로그아웃 하시겠습니까?</p>
+
+            <div className={styles.confirmActions}>
+              <button type="button" className={styles.closeButton} onClick={closeModal}>
+                취소
+              </button>
+              <button type="button" className={styles.loginButton} onClick={handleLogout}>
+                로그아웃
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
