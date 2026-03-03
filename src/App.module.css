@@ -1,5 +1,12 @@
 .app {
-  margin: 0 auto;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+main,
+section {
+  width: 100%;
 }
 
 /* header 높이를 고려한 스크롤 마진 설정 */
