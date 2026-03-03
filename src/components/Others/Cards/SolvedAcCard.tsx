@@ -5,7 +5,7 @@ import {
   getSolvedAcTierText,
   getSolvedAcUser,
   type SolvedAcUser,
-} from '../../../api/solvedAc'
+} from '../../../api/solvedac'
 
 const SolvedAcCard = () => {
   const solvedAcHandle = getSolvedAcHandle()
