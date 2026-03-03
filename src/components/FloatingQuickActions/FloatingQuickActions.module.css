@@ -1,0 +1,48 @@
+.wrapper {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1400;
+}
+
+.scrollTopButton {
+  --press-progress: 0;
+
+  position: relative;
+  overflow: hidden;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #f8f8f8;
+  color: #222;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease;
+}
+
+.scrollTopButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #e0ef45;
+  transform: scaleY(var(--press-progress));
+  transform-origin: bottom;
+  transition: transform 0.05s linear;
+}
+
+.scrollTopButton:hover {
+  transform: translateY(-1px);
+}
+
+.icon {
+  position: relative;
+  z-index: 1;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
