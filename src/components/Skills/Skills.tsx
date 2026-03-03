@@ -19,7 +19,10 @@ type SkillRowDB = {
 
 type SkillRowUI = {
     category: string;
-    items: string[];
+    items: Array<{
+        skill_id: number;
+        name: string;
+    }>;
 };
 
 // 카테고리에 아이콘 매핑
@@ -51,14 +54,14 @@ const getColorFromText = (text: string) => {
 
 // DB rows -> UI rows
 const groupByCategory = (rows: SkillRowDB[]): SkillRowUI[] => {
-    const map = new Map<string, string[]>();
+    const map = new Map<string, SkillRowUI["items"]>();
 
     for (const r of rows) {
         const key = r.category?.trim();
         if (!key) continue;
 
         const arr = map.get(key) ?? [];
-        arr.push(r.name);
+        arr.push({ skill_id: r.skill_id, name: r.name });
         map.set(key, arr);
     }
 
@@ -136,6 +139,20 @@ const Skills = () => {
         },
     });
 
+    const editSkillMutation = useMutation({
+        mutationFn: async ({ skill_id, name }: { skill_id: number; name: string }) => {
+            const { error } = await supabase
+                .from("skill")
+                .update({ name })
+                .eq("skill_id", skill_id);
+
+            if (error) throw error;
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["skill"] });
+        },
+    });
+
     const handleAddSkill = async (category: string) => {
         const value = window.prompt(`${category} 카테고리에 추가할 기술명을 입력하세요.`);
 
@@ -153,6 +170,28 @@ const Skills = () => {
             window.alert("기술이 추가되었습니다.");
         } catch {
             window.alert("기술 추가에 실패했습니다.");
+        }
+    };
+
+    const handleEditSkill = async (skillId: number, currentName: string) => {
+        const value = window.prompt("수정할 기술명을 입력하세요.", currentName);
+
+        if (value === null) return;
+
+        const name = value.trim();
+
+        if (!name) {
+            window.alert("기술명을 입력해주세요.");
+            return;
+        }
+
+        if (name === currentName) return;
+
+        try {
+            await editSkillMutation.mutateAsync({ skill_id: skillId, name });
+            window.alert("기술이 수정되었습니다.");
+        } catch {
+            window.alert("기술 수정에 실패했습니다.");
         }
     };
 
@@ -232,12 +271,12 @@ const Skills = () => {
 
                                 <div className={styles.chips}>
                                     {row.items.map((item) => (
-                                        <div key={`${row.category}-${item}`} className={styles.skillItem}>
+                                        <div key={item.skill_id} className={styles.skillItem}>
                                             <span
                                                 className={styles.chip}
-                                                style={{ backgroundColor: getColorFromText(item) }}
+                                                style={{ backgroundColor: getColorFromText(item.name) }}
                                             >
-                                                {item}
+                                                {item.name}
                                             </span>
 
                                             {loggedIn && editMode === "delete" ? (
@@ -247,9 +286,16 @@ const Skills = () => {
                                             ) : null}
 
                                             {loggedIn && editMode === "edit" ? (
-                                                <span className={`${styles.modeBadge} ${styles.editBadge}`} aria-hidden>
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.modeBadge} ${styles.editBadge}`}
+                                                    onClick={() => {
+                                                        void handleEditSkill(item.skill_id, item.name);
+                                                    }}
+                                                    disabled={editSkillMutation.isPending}
+                                                >
                                                     <img src={EditIcon} alt="" className={styles.editIcon} />
-                                                </span>
+                                                </button>
                                             ) : null}
                                         </div>
                                     ))}
