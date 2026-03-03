@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import styles from './Projects.module.css'
 import monitorIcon from '../../assets/icons/monitor.svg'
 import githubIcon from '../../assets/icons/github.png'
@@ -7,6 +7,7 @@ import nextIcon from '../../assets/icons/next.svg'
 import { supabase } from '../../api/supabase'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
+import { isAuthenticated } from '../../utils/authStorage'
 
 
 type SkillRow = {
@@ -68,6 +69,20 @@ const getCategoryTone = (category: string | null) => {
 
 
 const Projects = () => {
+    const [canAddProject, setCanAddProject] = useState(() => isAuthenticated())
+
+    useEffect(() => {
+        const syncAuthState = () => {
+            setCanAddProject(isAuthenticated())
+        }
+
+        window.addEventListener('auth-changed', syncAuthState)
+
+        return () => {
+            window.removeEventListener('auth-changed', syncAuthState)
+        }
+    }, [])
+
     const { data: projects = [], isLoading, error } = useQuery<ProjectUI[]>({
         queryKey: ['projects'],
         queryFn: async () => {
@@ -136,7 +151,7 @@ const Projects = () => {
 
 
     // 페이징
-    const PAGE_SIZE = 3
+    const PAGE_SIZE = canAddProject ? 3 : 4
 
     const pages = useMemo(() => {
         const out: typeof projects[] = []
@@ -144,7 +159,7 @@ const Projects = () => {
             out.push(filteredProjects.slice(i, i + PAGE_SIZE))
         }
         return out
-    }, [filteredProjects])
+    }, [filteredProjects, PAGE_SIZE])
 
     const totalPages = pages.length
     const showArrows = totalPages > 1
@@ -320,9 +335,11 @@ const Projects = () => {
                             {loopPages.map((pageProjects, pIndex) => (
                                 <div key={pIndex} className={styles.slide}>
                                     <div className={styles.cards}>
-                                        <button type="button" className={styles.addCard} aria-label="프로젝트 추가">
-                                            <span className={styles.addPlus}>+</span>
-                                        </button>
+                                        {canAddProject ? (
+                                            <button type="button" className={styles.addCard} aria-label="프로젝트 추가">
+                                                <span className={styles.addPlus}>+</span>
+                                            </button>
+                                        ) : null}
 
                                         {pageProjects.map((project, i) => {
                                             const category = normalizeCategory(project.category)
