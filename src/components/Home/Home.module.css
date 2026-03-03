@@ -1,4 +1,5 @@
 .home {
+  width: 100%;
   height: calc(100vh - 72px);
   min-height: 680px;
   display: flex;
@@ -8,6 +9,7 @@
 /* 기초 뼈대 디자인 */
 /* hero 영역 디자인 */
 .hero {
+  width: 100%;
   flex: 8;
   position: relative;
   overflow: hidden;
@@ -15,6 +17,7 @@
 
 /* 바텀 영역 디자인 */
 .bottom {
+  width: 100%;
   flex: 5;
   display: grid;
   grid-template-columns: 424fr 1016fr;
@@ -301,5 +304,23 @@
   .linkBtn img {
     width: 30px;
     height: 30px;
+  }
+}
+
+@media (max-width: 420px) {
+  .title {
+    font-size: 30px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .name {
+    font-size: 30px;
+  }
+
+  .infoItem {
+    font-size: 14px;
   }
 }

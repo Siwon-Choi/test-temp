@@ -22,7 +22,9 @@
     cursor: pointer;
     letter-spacing: -0.2px;
     user-select: none;
+    white-space: nowrap;
 }
+
 
 .nav {
     display: flex;
@@ -47,4 +49,45 @@
 
 .active {
   color: #ffffff !important;
+}
+
+
+@media (max-width: 1023px) {
+    .header {
+        padding: 0 20px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .nav {
+        gap: 16px;
+    }
+
+    .nav button {
+        font-size: 16px;
+        padding: 8px 4px;
+    }
+}
+
+@media (max-width: 767px) {
+    .header {
+        padding: 0 12px;
+        gap: 10px;
+    }
+
+    .logo {
+        font-size: 15px;
+        letter-spacing: 0;
+    }
+
+    .nav {
+        gap: 8px;
+    }
+
+    .nav button {
+        font-size: 13px;
+        padding: 6px 3px;
+    }
 }
