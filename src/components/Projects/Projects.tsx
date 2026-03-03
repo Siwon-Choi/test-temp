@@ -6,7 +6,7 @@ import prevIcon from '../../assets/icons/prev.svg'
 import nextIcon from '../../assets/icons/next.svg'
 import editIcon from '../../assets/icons/edit.svg'
 import { supabase } from '../../api/supabase'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router'
 import { isAuthenticated } from '../../utils/authStorage'
 
@@ -71,7 +71,9 @@ const getCategoryTone = (category: string | null) => {
 
 const Projects = () => {
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const [canAddProject, setCanAddProject] = useState(() => isAuthenticated())
+    const [deletingProjectId, setDeletingProjectId] = useState<number | null>(null)
 
     useEffect(() => {
         const syncAuthState = () => {
@@ -213,6 +215,46 @@ const Projects = () => {
     const onCategoryChange = (category: string) => {
         setActiveCategory(category)
         resetCarousel()
+    }
+
+    const handleDeleteProject = async (project: Pick<ProjectUI, 'project_id' | 'slug' | 'title'>) => {
+        if (!canAddProject) {
+            alert('로그인 후 삭제할 수 있습니다.')
+            return
+        }
+
+        if (deletingProjectId !== null) {
+            return
+        }
+
+        const shouldDelete = window.confirm(`"${project.title}" 프로젝트를 삭제할까요?`)
+        if (!shouldDelete) return
+
+        setDeletingProjectId(project.project_id)
+
+        try {
+            const { error: skillError } = await supabase
+                .from('projectskill')
+                .delete()
+                .eq('project_id', project.project_id)
+
+            if (skillError) throw skillError
+
+            const { error: projectError } = await supabase
+                .from('project')
+                .delete()
+                .eq('project_id', project.project_id)
+
+            if (projectError) throw projectError
+
+            await queryClient.invalidateQueries({ queryKey: ['projects'] })
+            alert('프로젝트가 삭제되었습니다.')
+        } catch (e) {
+            console.error(e)
+            alert('프로젝트 삭제에 실패했습니다.')
+        } finally {
+            setDeletingProjectId(null)
+        }
     }
 
 
@@ -358,10 +400,19 @@ const Projects = () => {
                                                             className={`${styles.controlButton} ${styles.editControlButton}`}
                                                             aria-label={`${project.title} 수정`}
                                                             onClick={() => navigate(`/projects/${project.slug}/edit`)}
+                                                            disabled={deletingProjectId === project.project_id}
                                                         >
                                                             <img src={editIcon} alt="" />
                                                         </button>
-                                                        <button type="button" className={`${styles.controlButton} ${styles.deleteControlButton}`} aria-label={`${project.title} 삭제`}>
+                                                        <button
+                                                            type="button"
+                                                            className={`${styles.controlButton} ${styles.deleteControlButton}`}
+                                                            aria-label={`${project.title} 삭제`}
+                                                            onClick={() => {
+                                                                void handleDeleteProject(project)
+                                                            }}
+                                                            disabled={deletingProjectId === project.project_id}
+                                                        >
                                                             ×
                                                         </button>
                                                     </div>
