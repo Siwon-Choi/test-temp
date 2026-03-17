@@ -170,6 +170,7 @@ function LoginHoldButton() {
         onMouseUp={stopHold}
         onMouseLeave={stopHold}
         onTouchStart={startHold}
+        onTouchMove={stopHold}
         onTouchEnd={stopHold}
         onTouchCancel={stopHold}
         onClick={handleClick}
